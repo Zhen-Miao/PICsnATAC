@@ -4,7 +4,14 @@ Version: 0.0.1
 Authors@R: 
     person("Zhen", "Miao", , "zhenmiao@pennmedicine.upenn.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3255-9517"))
-Description: Paired Insertion Counting for snATAC-seq data
+Description: A package for paired Insertion Counting for snATAC-seq data.
+Imports: 
+  rtracklayer,
+  dplyr,
+  IRanges,
+  GenomicRanges,
+  methods,
+  Matrix
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

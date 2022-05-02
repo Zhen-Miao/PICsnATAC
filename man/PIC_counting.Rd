@@ -2,7 +2,7 @@
 % Please edit documentation in R/PIC_function.R
 \name{PIC_counting}
 \alias{PIC_counting}
-\title{Title}
+\title{Title PIC-count}
 \usage{
 PIC_counting(cells, fragment_tsv_gz_file_location, peak_sets)
 }
@@ -17,5 +17,5 @@ PIC_counting(cells, fragment_tsv_gz_file_location, peak_sets)
 The counted cell by peak matrix
 }
 \description{
-Title
+Title PIC-count
 }

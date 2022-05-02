@@ -1,12 +1,14 @@
 ## PIC function
-library("rtracklayer")
-library("dplyr")
-library("GenomicRanges")
-library("Matrix")
 
 
-#' Title
+#' Title PIC-count
 #'
+#' @importFrom rtracklayer import
+#' @importFrom methods as
+#' @import dplyr
+#' @import GenomicRanges
+#' @importFrom IRanges subsetByOverlaps
+#' @import Matrix
 #' @param cells The cell barcode lables as a Character vector
 #' @param fragment_tsv_gz_file_location The 10X Cell Ranger output fragment.tsv.gz file location
 #' @param peak_sets The set of peaks as a GenomicRanges object
@@ -20,7 +22,7 @@ PIC_counting <- function(cells,
                          peak_sets) {
 
   ## load fragment files
-  f1 <- import(fragment_tsv_gz_file_location, format = "BED")
+  f1 <- rtracklayer::import(fragment_tsv_gz_file_location, format = "BED")
 
   ## create the object to save output
   n_cells <- length(cells)
@@ -29,6 +31,8 @@ PIC_counting <- function(cells,
   names(out_summ) <- cells
 
   ## pre-sort fragments
+  f1_s <- f1[f1$name %in% cells,]
+  f1_s <- subsetByOverlaps(f1_s, ranges = peak_sets)
   n_subset <- n_cells %/% 500 + 1
   f1k <- rep(list(), length = n_subset)
   for (i in 1:n_subset) {
@@ -51,11 +55,11 @@ PIC_counting <- function(cells,
     f1_sub <- f1k[[jj]][f1k[[jj]]$name == ii, ]
 
     ## get start and end position
-    f1s <- resize(f1_sub, width = 1, fix = "start")
-    f1e <- resize(f1_sub, width = 1, fix = "end")
+    f1s <- GenomicRanges::resize(f1_sub, width = 1, fix = "start")
+    f1e <- GenomicRanges::resize(f1_sub, width = 1, fix = "end")
 
-    overlaped_s <- findOverlaps(f1s, peak_sets, select = "first")
-    overlaped_e <- findOverlaps(f1e, peak_sets, select = "first")
+    overlaped_s <- GenomicRanges::findOverlaps(f1s, peak_sets, select = "first")
+    overlaped_e <- GenomicRanges::findOverlaps(f1e, peak_sets, select = "first")
     overlaped_e_nodc <- overlaped_e
 
     overlaped_e_nodc[overlaped_s == overlaped_e_nodc] <- NA
