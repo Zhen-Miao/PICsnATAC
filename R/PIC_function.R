@@ -22,8 +22,12 @@ PIC_counting <- function(cells,
                          peak_sets) {
 
   ## load fragment files
-  f1 <- rtracklayer::import(fragment_tsv_gz_file_location, format = "BED")
-
+  f1 <- data.table::fread(fragment_tsv_gz_file_location,header = F, 
+                          select = 1:4)
+  colnames(f1) <- c('seqname','start','end','name')
+  f1 <- f1[name %in% cells]
+  f1 = GenomicRanges::makeGRangesFromDataFrame(f1)
+  
   ## create the object to save output
   n_cells <- length(cells)
   n_features <- length(peak_sets)
@@ -31,8 +35,9 @@ PIC_counting <- function(cells,
   names(out_summ) <- cells
 
   ## pre-sort fragments
-  f1_s <- f1[f1$name %in% cells,]
-  f1_s <- subsetByOverlaps(f1_s, ranges = peak_sets)
+  f1_s <- subsetByOverlaps(f1, ranges = peak_sets)
+  rm(f1)
+  gc()
   n_subset <- n_cells %/% 500 + 1
   f1k <- rep(list(), length = n_subset)
   for (i in 1:n_subset) {
@@ -40,8 +45,9 @@ PIC_counting <- function(cells,
     e <- min(i * 500, n_cells)
     f1k[[i]] <- f1_s[f1_s$name %in% cells[s:e], ]
   }
-  rm(f1)
+  rm(f1_s)
   gc()
+
 
   ## counting
   for (i in 1:n_cells) {
