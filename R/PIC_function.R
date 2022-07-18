@@ -59,6 +59,9 @@ PIC_counting <- function(cells,
     }
 
     f1_sub <- f1k[[jj]][f1k[[jj]]$name == ii, ]
+    
+    ## deduplicate f1_sub
+    f1_sub <- unique(f1_sub)
 
     ## get start and end position
     f1s <- GenomicRanges::resize(f1_sub, width = 1, fix = "start")
