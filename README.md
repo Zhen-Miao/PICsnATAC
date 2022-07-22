@@ -32,3 +32,7 @@ pic_matrix <- PIC_counting(cells, fragment_tsv_gz_file_location, peak_sets)
 For additional example, please check the following vignettes 
 
 [Vignette 1: PIC counting for Cell Ranger output.](https://htmlpreview.github.io/?https://github.com/Zhen-Miao/PIC-snATAC/blob/main/vignettes/vignette-1----PIC-counting-with-10X-Cell-Ranger-output.html)
+
+[Vignette 2: PIC counting in Seurat/Signac workflow.](https://htmlpreview.github.io/?https://github.com/Zhen-Miao/PIC-snATAC/blob/main/vignettes/vignette-2----PIC-counting-in-Seurat-workflow.html)
+
+
