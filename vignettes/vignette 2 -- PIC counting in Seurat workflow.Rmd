@@ -38,10 +38,10 @@ Please also refer to [Signac Vignettes](https://satijalab.org/signac/articles/pb
 ### Cell Barcodes
 If we want to keep the cells from Cell Ranger filtering scheme:
 ```{r eval=FALSE}
-metadata <- read.csv('atac_pbmc_5k_nextgem_singlecell.csv', header = T )
+meta.data <- read.csv('atac_pbmc_5k_nextgem_singlecell.csv', header = T )
 # -- in your own Cell Ranger output, the file name will be 'singlecell.csv'
-cells <- setdiff(metadata$barcode, 'NO_BARCODE')
-# -- usually, 10X Cell Ranger first line is 'NO_BARCODE'
+meta.data_filtered <- meta.data[meta.data$is__cell_barcode == 1,]
+cells <- meta.data_filtered$barcode
 ```
 
 ### Peak set

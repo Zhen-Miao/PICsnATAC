@@ -24,7 +24,7 @@ library('PICsnATAC')
 
 Input files for PIC counting includes:
 
-  * cell barcodes (`singlecell.csv`)
+  * cell barcodes with metadata (`singlecell.csv`)
   * list of peak regions (`peaks.bed`)
   * fragment files (`fragment.tsv.gz`)
 
@@ -32,16 +32,16 @@ Below are the step-by-step instructions for obtaining these input from 10X Cell 
 
 ### Cell Barcodes
 If we want to keep the cells from Cell Ranger filtering scheme:
-```{r}
+```{r eval=FALSE}
 meta.data <- read.csv('atac_pbmc_5k_nextgem_singlecell.csv', header = T )
 # -- in your own Cell Ranger output, the file name will be 'singlecell.csv'
-cells <- setdiff(meta.data$barcode, 'NO_BARCODE')
-# -- usually, 10X Cell Ranger first line is 'NO_BARCODE'
+meta.data_filtered <- meta.data[meta.data$is__cell_barcode == 1,]
+cells <- meta.data_filtered$barcode
 ```
 
 ### Peak set
 If we want to keep the set of peaks from Cell Ranger:
-```{r}
+```{r eval=FALSE}
 peaks <- data.table::fread('atac_pbmc_5k_nextgem_peaks.bed',header = F)
 # -- in your own Cell Ranger output, the file name will be 'peaks.bed'
 colnames(peaks) <- c('seqname', 'start', 'end')

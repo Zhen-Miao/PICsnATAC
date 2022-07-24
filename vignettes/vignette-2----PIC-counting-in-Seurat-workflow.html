@@ -378,10 +378,10 @@ library(&#39;Seurat&#39;)</code></pre>
 <div id="cell-barcodes" class="section level3">
 <h3>Cell Barcodes</h3>
 <p>If we want to keep the cells from Cell Ranger filtering scheme:</p>
-<pre class="r"><code>metadata &lt;- read.csv(&#39;atac_pbmc_5k_nextgem_singlecell.csv&#39;, header = T )
+<pre class="r"><code>meta.data &lt;- read.csv(&#39;atac_pbmc_5k_nextgem_singlecell.csv&#39;, header = T )
 # -- in your own Cell Ranger output, the file name will be &#39;singlecell.csv&#39;
-cells &lt;- setdiff(metadata$barcode, &#39;NO_BARCODE&#39;)
-# -- usually, 10X Cell Ranger first line is &#39;NO_BARCODE&#39;</code></pre>
+meta.data_filtered &lt;- meta.data[meta.data$is__cell_barcode == 1,]
+cells &lt;- meta.data_filtered$barcode</code></pre>
 </div>
 <div id="peak-set" class="section level3">
 <h3>Peak set</h3>
