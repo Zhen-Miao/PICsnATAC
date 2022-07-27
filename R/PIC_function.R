@@ -45,9 +45,10 @@ PIC_counting <- function(cells,
     ## load fragment files
     f1 <- data.table::fread(fragment_tsv_gz_file_location,header = F, 
                             select = 1:4)
-    colnames(f1) <- c('seqname','start','end','name')
-    f1 <- f1[name %in% cells]
-    f1 = GenomicRanges::makeGRangesFromDataFrame(f1)
+    colnames(f1) <- c('seqname','start','end','cell_barcode')
+    f1 <- f1[cell_barcode %in% cells]
+    f1 = GenomicRanges::makeGRangesFromDataFrame(f1,
+                                                 keep.extra.columns=T)
     
     ## pre-sort fragments
     f1_s <- subsetByOverlaps(f1, ranges = peak_sets)
@@ -58,7 +59,7 @@ PIC_counting <- function(cells,
     for (i in 1:n_subset) {
       s <- (i - 1) * 500 + 1
       e <- min(i * 500, n_cells)
-      f1k[[i]] <- f1_s[f1_s$name %in% cells[s:e], ]
+      f1k[[i]] <- f1_s[f1_s$cell_barcode %in% cells[s:e], ]
     }
     rm(f1_s)
     gc()
@@ -73,7 +74,7 @@ PIC_counting <- function(cells,
         jj <- (i %/% 500) + 1
       }
       
-      f1_sub <- f1k[[jj]][f1k[[jj]]$name == ii, ]
+      f1_sub <- f1k[[jj]][f1k[[jj]]$cell_barcode == ii, ]
       
       ## deduplicate f1_sub
       if(deduplicate){
@@ -150,8 +151,8 @@ PIC_counting <- function(cells,
       # length(res[[1]])
       f1_seq <- read.csv(textConnection(res[[1]]), sep="\t", header=FALSE)
       f1_seq <- f1_seq[,1:4]
-      colnames(f1_seq) <- c('seqname','start','end','name')
-      f1_seq <- f1_seq[f1_seq$name %in% cells,]
+      colnames(f1_seq) <- c('seqname','start','end','cell_barcode')
+      f1_seq <- f1_seq[f1_seq$cell_barcode %in% cells,]
       f1_seq = GenomicRanges::makeGRangesFromDataFrame(f1_seq,
                                                        keep.extra.columns=T)
       
@@ -164,7 +165,7 @@ PIC_counting <- function(cells,
       for (i in 1:n_cells) {
         
         ii <- cells[i]
-        f1_sub <- f1_seq[f1_seq$name == ii, ]
+        f1_sub <- f1_seq[f1_seq$cell_barcode == ii, ]
         
         if(length(f1_sub) == 0){
           out_summ[[ii]] <- zero_vec
