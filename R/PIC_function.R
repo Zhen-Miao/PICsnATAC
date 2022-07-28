@@ -45,7 +45,8 @@ PIC_counting <- function(cells,
     ## load fragment files
     f1 <- data.table::fread(fragment_tsv_gz_file_location,header = F, 
                             select = 1:4)
-    colnames(f1) <- c('seqname','start','end','cell_barcode')
+    # colnames(f1) <- c('seqname','start','end','cell_barcode')
+    setnames(f1, c('seqname','start','end','cell_barcode'))
     f1 <- f1[cell_barcode %in% cells]
     f1 = GenomicRanges::makeGRangesFromDataFrame(f1,
                                                  keep.extra.columns=T)
