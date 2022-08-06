@@ -45,4 +45,6 @@ For additional example, please check the following vignettes
 
 [Vignette 2: PIC counting in Seurat/Signac workflow.](https://htmlpreview.github.io/?https://github.com/Zhen-Miao/PIC-snATAC/blob/main/vignettes/vignette-2----PIC-counting-in-Seurat-workflow.html)
 
+[Vignette 3: PIC counting in ArchR workflow.](https://htmlpreview.github.io/?https://github.com/Zhen-Miao/PIC-snATAC/blob/main/vignettes/vignette-3----PIC-counting-in-ArchR-workflow.html)
 
+[vignette 4: PIC counting with dsc-ATAC-seq data.](https://github.com/Zhen-Miao/PIC-snATAC/blob/main/vignettes/vignette-4----PIC-counting-with-dsc-ATAC-seq-data.html)
