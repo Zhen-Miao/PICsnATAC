@@ -11,7 +11,7 @@
 
 
 
-<title>Vignette 2 – PIC counting in Seurat/Signac workflow</title>
+<title>Vignette 4 – PIC counting with dsc-ATAC-seq data</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -357,16 +357,19 @@ pre code {
 
 
 
-<h1 class="title toc-ignore">Vignette 2 – PIC counting in Seurat/Signac
-workflow</h1>
+<h1 class="title toc-ignore">Vignette 4 – PIC counting with dsc-ATAC-seq
+data</h1>
 
 </div>
 
 
 <div id="content" class="section level3">
 <h3>content</h3>
-<p>This Vignette contains an example to use PIC counting in Seurat
-workflow.</p>
+<p>This Vignette contains an example to use PIC counting with
+dsc-ATAC-seq data. Specifically, this data type has more fragments per
+cell, making it more quantitative. However, due to bead overloading, we
+recommend setting deduplicate step during PIC counting step. Please see
+details below.</p>
 </div>
 <div id="required-libraries" class="section level3">
 <h3>required libraries</h3>
@@ -375,73 +378,62 @@ the analysis.</p>
 <pre class="r"><code>library(&#39;data.table&#39;)
 library(&#39;GenomicRanges&#39;)
 library(&#39;Matrix&#39;)
-library(&#39;PICsnATAC&#39;)
-library(&#39;Signac&#39;)
-library(&#39;Seurat&#39;)</code></pre>
+library(&#39;PICsnATAC&#39;)</code></pre>
 </div>
 <div id="input-files" class="section level3">
 <h3>Input files</h3>
-<p>Input files for PIC counting includes:</p>
+<p>Below are the step-by-step instructions for obtaining these input.
+Example datasets can be downloaded from GEO: GSE123576 <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE123576">here</a>.
+Here in particular, we used the Mouse brain sample (Mouse #2, Channel
+#1).</p>
+<p>Please make sure to download the following files for PIC
+counting:</p>
 <ul>
-<li>cell barcodes with metadata (<code>singlecell.csv</code>)</li>
-<li>list of peak regions (<code>peaks.bed</code>)</li>
-<li>fragment files (<code>fragment.tsv.gz</code>)</li>
-<li>fragment file index (<code>fragment.tsv.gz.tbi</code>)</li>
+<li>cell barcodes with metadata
+(<code>GSE123576_mousebrain_cellData_revision.tsv</code>)</li>
+<li>list of peak regions
+(<code>GSE123576_mousebrain_peaks_revision.bed</code>)</li>
+<li>fragment files
+(<code>GSM3507349_Mouse2-Channel1.fragments.tsv.gz</code>)</li>
+<li>fragment file index
+(<code>GSM3507349_Mouse2-Channel1.fragments.tsv.gz.tbi</code>)</li>
 </ul>
-<p>Below are the step-by-step instructions for obtaining these input
-from 10X Cell Ranger output files. Example datasets can be downloaded
-from 10X Genomics website <a href="https://www.10xgenomics.com/resources/datasets/5-k-peripheral-blood-mononuclear-cells-pbm-cs-from-a-healthy-donor-next-gem-v-1-1-1-1-standard-2-0-0">here</a>.</p>
-<p>Please also refer to <a href="https://satijalab.org/signac/articles/pbmc_vignette.html">Signac
-Vignettes</a> for additional information of Signac workflow</p>
 </div>
 <div id="cell-barcodes" class="section level3">
 <h3>Cell Barcodes</h3>
-<p>If we want to keep the cells from Cell Ranger filtering scheme:</p>
-<pre class="r"><code>meta.data &lt;- read.csv(&#39;atac_pbmc_5k_nextgem_singlecell.csv&#39;, header = T )
-# -- in your own Cell Ranger output, the file name will be &#39;singlecell.csv&#39;
-meta.data_filtered &lt;- meta.data[meta.data$is__cell_barcode == 1,]
-cells &lt;- meta.data_filtered$barcode</code></pre>
+<p>If we want to keep the cells from the publications:</p>
+<pre class="r"><code>cm = read.table(&#39;GSE123576_mousebrain_cellData_revision.tsv&#39;, sep = &#39;\t&#39;, header= T)
+samples =  sub(&quot;_B.*&quot;, &quot;&quot;, cm$DropBarcode)
+cm$sample = samples
+
+## choose sample 
+cmtsample = cm[cm$sample == &#39;N701_Exp119_sample1_S1&#39;,]
+cells = cmtsample$DropBarcode</code></pre>
 </div>
 <div id="peak-set" class="section level3">
 <h3>Peak set</h3>
-<p>If we want to keep the set of peaks from Cell Ranger:</p>
-<pre class="r"><code>peaks &lt;- data.table::fread(&#39;atac_pbmc_5k_nextgem_peaks.bed&#39;,header = F)
-# -- in your own Cell Ranger output, the file name will be &#39;peaks.bed&#39;
-colnames(peaks) &lt;- c(&#39;seqname&#39;, &#39;start&#39;, &#39;end&#39;)
-peak_sets = GenomicRanges::makeGRangesFromDataFrame(peaks)</code></pre>
-<p>Note, the codes will be the same for MACS2 called peaks, just change
-the file name</p>
+<p>If we want to keep the set of peaks from the publication:</p>
+<pre class="r"><code>feature_df = read.csv(&#39;GSE123576_mousebrain_peaks_revision.bed&#39;, sep = &#39;\t&#39;, header = F)
+colnames(feature_df) &lt;- c(&#39;seqname&#39;, &#39;start&#39;, &#39;end&#39;)
+peak_sets = GenomicRanges::makeGRangesFromDataFrame(feature_df)</code></pre>
 </div>
 <div id="run-pic-and-save-output" class="section level3">
 <h3>Run PIC and save output</h3>
-<pre class="r"><code>fragment_tsv_gz_file_location &lt;- &#39;atac_pbmc_5k_nextgem_fragments.tsv.gz&#39;
+<p>Please note, for dsc-ATAC-seq data, because the beads are overloaded,
+we recommend to set <strong>deduplicate = TRUE</strong> so that we do
+not double count fragments. Although, based on our analysis, the
+fragment.tsv.gz file provided in GEO has already been de-duplicated, we
+still recommend doing so for all dsc-ATAC-seq data.</p>
+<pre class="r"><code>fragment_tsv_gz_file_location = &#39;GSM3507349_Mouse2-Channel1.fragments.tsv.gz&#39;
 pic_mat &lt;- PIC_counting(
   cells = cells,
   fragment_tsv_gz_file_location = fragment_tsv_gz_file_location,
-  peak_sets = peak_sets)
+  peak_sets = peak_sets,
+  deduplicate = TRUE)
 saveRDS(pic_mat, &#39;PIC_mat_1.rds&#39;) 
 ## if you have multiple matrices, don&#39;t forget to save under different names</code></pre>
 <p>Note if you have multiple matrices, please make sure you save them
 under different file names</p>
-</div>
-<div id="create-seurat-object-with-pic-output" class="section level3">
-<h3>Create Seurat Object with PIC output</h3>
-<pre class="r"><code>counts &lt;- readRDS(&#39;PIC_mat_1.rds&#39;)
-
-chrom_assay &lt;- CreateChromatinAssay(
-  counts = counts,
-  sep = c(&quot;:&quot;, &quot;-&quot;),
-  genome = &#39;hg19&#39;,
-  fragments = fragment_tsv_gz_file_location,
-  min.cells = 10,
-  min.features = 200
-)
-
-pbmc &lt;- CreateSeuratObject(
-  counts = chrom_assay,
-  assay = &quot;peaks&quot;,
-  meta.data = metadata
-)</code></pre>
 </div>
 <div id="reference" class="section level3">
 <h3>Reference</h3>
@@ -449,9 +441,11 @@ pbmc &lt;- CreateSeuratObject(
 manuscript:</p>
 <p>Miao Z, Kim J. Is single nucleus ATAC-seq accessibility a qualitative
 or quantitative measurement?. <em>bioRxiv</em>. 2022.</p>
-<p>Signac manuscript:</p>
-<p>Stuart, Tim, et al. “Single-cell chromatin state analysis with
-Signac.” <em>Nature methods</em> 18.11 (2021): 1333-1341.</p>
+<p>The dsc-ATAC-seq dataset is associated with the following
+publication:</p>
+<p>Lareau CA, Duarte FM, Chew JG, Kartha VK et al. Droplet-based
+combinatorial indexing for massive-scale single-cell chromatin
+accessibility. <em>Nat Biotechnol</em>. 2019 Aug;37(8):916-924.</p>
 </div>
 
 

@@ -11,7 +11,7 @@
 
 
 
-<title>Vignette 2 – PIC counting with dsc-ATAC-seq data</title>
+<title>Vignette 3 – PIC counting in ArchR workflow</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -357,19 +357,16 @@ pre code {
 
 
 
-<h1 class="title toc-ignore">Vignette 2 – PIC counting with dsc-ATAC-seq
-data</h1>
+<h1 class="title toc-ignore">Vignette 3 – PIC counting in ArchR
+workflow</h1>
 
 </div>
 
 
 <div id="content" class="section level3">
 <h3>content</h3>
-<p>This Vignette contains an example to use PIC counting with
-dsc-ATAC-seq data. Specifically, this data type has more fragments per
-cell, making it more quantitative. However, due to bead overloading, we
-recommend setting deduplicate step during PIC counting step. Please see
-details below.</p>
+<p>This Vignette contains an example to use PIC counting in ArchR
+workflow.</p>
 </div>
 <div id="required-libraries" class="section level3">
 <h3>required libraries</h3>
@@ -379,63 +376,112 @@ the analysis.</p>
 library(&#39;GenomicRanges&#39;)
 library(&#39;Matrix&#39;)
 library(&#39;PICsnATAC&#39;)
-library(&#39;Signac&#39;)
-library(&#39;Seurat&#39;)</code></pre>
+library(&#39;ArchR&#39;)</code></pre>
 </div>
 <div id="input-files" class="section level3">
 <h3>Input files</h3>
 <p>Below are the step-by-step instructions for obtaining these input.
-Example datasets can be downloaded from GEO: GSE123576 <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE123576">here</a>.
-Here in particular, we used the Mouse brain sample (Mouse #2, Channel
-#1).</p>
-<p>Please make sure to download the following files for PIC
-counting:</p>
-<ul>
-<li>cell barcodes with metadata
-(<code>GSE123576_mousebrain_cellData_revision.tsv</code>)</li>
-<li>list of peak regions
-(<code>GSE123576_mousebrain_peaks_revision.bed</code>)</li>
-<li>fragment files
-(<code>GSM3507349_Mouse2-Channel1.fragments.tsv.gz</code>)</li>
-<li>fragment file index
-(<code>GSM3507349_Mouse2-Channel1.fragments.tsv.gz.tbi</code>)</li>
-</ul>
+Here we used the ArchR tutorial dataset to illustrate how to add PIC
+counting output to ArchR analysis. Please also refer to <a href="https://www.archrproject.com/articles/Articles/tutorial.html">ArchR
+Vignettes</a> for additional information of ArchR workflow</p>
+<p>Please make sure to download the tutorial dataset by running
+<code>getTutorialData()</code> function:</p>
 </div>
-<div id="cell-barcodes" class="section level3">
-<h3>Cell Barcodes</h3>
-<p>If we want to keep the cells from the publications:</p>
-<pre class="r"><code>cm = read.table(&#39;GSE123576_mousebrain_cellData_revision.tsv&#39;, sep = &#39;\t&#39;, header= T)
-samples =  sub(&quot;_B.*&quot;, &quot;&quot;, cm$DropBarcode)
-cm$sample = samples
+<div id="load-example-dataset-and-creating-arrow-files" class="section level3">
+<h3>Load Example Dataset and Creating Arrow Files</h3>
+<p>Here we used ArchR example dataset as</p>
+<pre class="r"><code>inputFiles &lt;- getTutorialData(&quot;Hematopoiesis&quot;)
+# inputFiles
+addArchRGenome(&quot;hg19&quot;)
+ArrowFiles &lt;- createArrowFiles(
+  inputFiles = inputFiles,
+  sampleNames = names(inputFiles),
+  minTSS = 4, #Dont set this too high because you can always increase later
+  minFrags = 1000, 
+  addTileMat = F,
+  addGeneScoreMat = F
+)</code></pre>
+</div>
+<div id="inferring-doublet" class="section level3">
+<h3>Inferring doublet</h3>
+<p>We have this section as ArchR tutorial recommended. But this is
+option and please make sure you understand the process of doublet
+inferrence before executing this part</p>
+<pre class="r"><code>doubScores &lt;- addDoubletScores(
+  input = ArrowFiles,
+  k = 10, #Refers to how many cells near a &quot;pseudo-doublet&quot; to count.
+  knnMethod = &quot;UMAP&quot;, #Refers to the embedding to use for nearest neighbor search.
+  LSIMethod = 1
+)</code></pre>
+</div>
+<div id="create-an-archrproject" class="section level3">
+<h3>Create an ArchRproject</h3>
+<pre class="r"><code>proj &lt;- ArchRProject(
+  ArrowFiles = ArrowFiles, 
+  outputDirectory = &quot;HemeTutorial&quot;,
+  copyArrows = TRUE #This is recommened so that you maintain an unaltered copy for later usage.
+)</code></pre>
+</div>
+<div id="peak-calling-with-macs2" class="section level3">
+<h3>Peak calling with MACS2</h3>
+<p>Please make sure MACS2 is installed before running this. ArchR also
+supports other peak calling methods, please refer to ArchR manual for
+additional options.</p>
+<pre class="r"><code>pathToMacs2 &lt;- findMacs2()
+proj &lt;- addReproduciblePeakSet(
+    ArchRProj = proj, 
+    pathToMacs2 = pathToMacs2
+)</code></pre>
+</div>
+<div id="obtain-pic-matrix-from-archrproject-input" class="section level3">
+<h3>Obtain PIC matrix from ArchRproject input</h3>
+<p>Here, we have three samples, we compute the PIC matrix for each of
+them separately.</p>
+<pre class="r"><code>pic_mat = rep(list(), length = length(inputFiles))
+for(s in seq_along(inputFiles)){
+  
+  ## select one sample
+  sample_sel &lt;- names(inputFiles)[s] 
+  allCells &lt;- rownames(getCellColData(proj)) ## all cells after filtering
+  cells_sample &lt;- allCells[startsWith(allCells, sample_sel)]
+  cells_sample_name_trunc &lt;- sub(&quot;.*\\#&quot;,&quot;&quot;,cells_sample)
 
-## choose sample 
-cmtsample = cm[cm$sample == &#39;N701_Exp119_sample1_S1&#39;,]
-cells = cmtsample$DropBarcode</code></pre>
+  peak_sets &lt;- proj@peakSet ## the peak set, from MACS2 peak calling results
+  fragment_tsv_gz_file_location &lt;- inputFiles[s]
+
+  pic_mat[[s]] &lt;- PIC_counting(
+    cells = cells_sample_name_trunc,
+    fragment_tsv_gz_file_location = fragment_tsv_gz_file_location,
+    peak_sets = peak_sets)
+  
+  ## change back the cell names to match with original input
+  colnames(pic_mat) &lt;- cells_sample
+}
+
+## we can run the following codes to get the complete peak by cell matrix
+## and we may save this matrix for tuture uses (e.g., if we hope to run
+## other analyses)
+
+# pic_mat_comb &lt;- do.call(cbind, pic_mat)
+# pic_mat_comb &lt;- pic_mat_comb[,rownames(getCellColData(proj))]</code></pre>
 </div>
-<div id="peak-set" class="section level3">
-<h3>Peak set</h3>
-<p>If we want to keep the set of peaks from the publication:</p>
-<pre class="r"><code>feature_df = read.csv(&#39;GSE123576_mousebrain_peaks_revision.bed&#39;, sep = &#39;\t&#39;, header = F)
-colnames(feature_df) &lt;- c(&#39;seqname&#39;, &#39;start&#39;, &#39;end&#39;)
-peak_sets = GenomicRanges::makeGRangesFromDataFrame(feature_df)</code></pre>
+<div id="add-pic-matrix-to-archrproject-object" class="section level3">
+<h3>Add PIC matrix to ArchRproject object</h3>
+<p>Here we iteratively add PIC matrix to the ArchR object</p>
+<pre class="r"><code>for(s in seq_along(inputFiles)){
+  ArchR:::.addMatToArrow(mat = pic_mat[[s]],
+                       ArrowFile = ArrowFiles[s],
+                       group = &#39;PIC&#39;,
+                       binarize = FALSE)
+}</code></pre>
 </div>
-<div id="run-pic-and-save-output" class="section level3">
-<h3>Run PIC and save output</h3>
-<p>Please note, for dsc-ATAC-seq data, because the beads are overloaded,
-we recommend to set <strong>deduplicate = TRUE</strong> so that we do
-not double count fragments. Although, based on our analysis, the
-fragment.tsv.gz file provided in GEO has already been de-duplicated, we
-still recommend doing so for all dsc-ATAC-seq data.</p>
-<pre class="r"><code>fragment_tsv_gz_file_location = &#39;GSM3507349_Mouse2-Channel1.fragments.tsv.gz&#39;
-pic_mat &lt;- PIC_counting(
-  cells = cells,
-  fragment_tsv_gz_file_location = fragment_tsv_gz_file_location,
-  peak_sets = peak_sets,
-  deduplicate = TRUE)
-saveRDS(pic_mat, &#39;PIC_mat_1.rds&#39;) 
-## if you have multiple matrices, don&#39;t forget to save under different names</code></pre>
-<p>Note if you have multiple matrices, please make sure you save them
-under different file names</p>
+<div id="save-and-load-archrproject" class="section level3">
+<h3>Save and load ArchRProject</h3>
+<pre class="r"><code>## to save object
+proj &lt;- saveArchRProject(ArchRProj = proj)
+
+## to load object
+proj &lt;- loadArchRProject(path = &quot;HemeTutorial&quot;)</code></pre>
 </div>
 <div id="reference" class="section level3">
 <h3>Reference</h3>
@@ -443,11 +489,10 @@ under different file names</p>
 manuscript:</p>
 <p>Miao Z, Kim J. Is single nucleus ATAC-seq accessibility a qualitative
 or quantitative measurement?. <em>bioRxiv</em>. 2022.</p>
-<p>The dsc-ATAC-seq dataset is associated with the following
-publication:</p>
-<p>Lareau CA, Duarte FM, Chew JG, Kartha VK et al. Droplet-based
-combinatorial indexing for massive-scale single-cell chromatin
-accessibility. <em>Nat Biotechnol</em>. 2019 Aug;37(8):916-924.</p>
+<p>ArchR manuscript:</p>
+<p>Granja, Jeffrey M., et al. “ArchR is a scalable software package for
+integrative single-cell chromatin accessibility analysis.” <em>Nature
+genetics</em> 53.3 (2021): 403-411.</p>
 </div>
 
 

@@ -1,5 +1,5 @@
 ---
-title: "Vignette 2 -- PIC counting with dsc-ATAC-seq data"
+title: "Vignette 4 -- PIC counting with dsc-ATAC-seq data"
 output: html_document
 ---
 
@@ -18,8 +18,6 @@ library('data.table')
 library('GenomicRanges')
 library('Matrix')
 library('PICsnATAC')
-library('Signac')
-library('Seurat')
 ```
 
 ### Input files

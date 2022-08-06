@@ -92,3 +92,7 @@ If you used PIC-snATAC counting in your analysis, please cite our manuscript:
 
 Miao Z, Kim J. Is single nucleus ATAC-seq accessibility a qualitative or quantitative measurement?. _bioRxiv_. 2022.
 
+Signac manuscript:
+
+Stuart, Tim, et al. "Single-cell chromatin state analysis with Signac." _Nature methods_ 18.11 (2021): 1333-1341.
+
