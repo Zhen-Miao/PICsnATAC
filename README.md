@@ -9,6 +9,16 @@
 The goal of PICsnATAC is to construct cell by peak matrix with Paired
 Insertion Counting (PIC) for snATAC-seq data
 
+## Dependencies
+
+Please install the dependent libraries by running the following codes
+``` r
+install.packages('data.table') ## (please make sure it is newer than 1.8)
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("GenomicRanges")
+```
+
 ## Installation
 
 You can install the development version of PICsnATAC from
