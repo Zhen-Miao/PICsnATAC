@@ -3,7 +3,6 @@
 
 #' Title PIC-count
 #'
-#' @importFrom rtracklayer import
 #' @importFrom methods as
 #' @import dplyr
 #' @import data.table
