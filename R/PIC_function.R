@@ -59,7 +59,8 @@ PIC_counting <- function(cells,
                                                  keep.extra.columns=T)
     
     ## pre-sort fragments
-    f1_s <- subsetByOverlaps(f1, ranges = peak_sets)
+    f1_s <- subsetByOverlaps(f1, ranges = peak_sets,
+                             maxgap = ceiling(extend_size/2))
     rm(f1)
     gc()
     n_subset <- n_cells %/% 500 + 1
