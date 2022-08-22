@@ -20,6 +20,8 @@
 #'  be helpful and recommended.
 #' @param load_full Whether to load the whole fragment.tsv.gz file into memory. If set
 #'  to FALSE, the function will load it dynamically to save RAM
+#' @param extend_size How long should we extend the exact insertion site as accessible 
+#'  window 
 #'
 #' @return The counted cell by peak matrix
 #' @export
@@ -29,7 +31,8 @@ PIC_counting <- function(cells,
                          fragment_tsv_gz_file_location,
                          peak_sets,
                          deduplicate = FALSE,
-                         load_full = TRUE) {
+                         load_full = TRUE,
+                         extend_size = 9) {
   
   ## create the object to save output
   n_cells <- length(cells)
@@ -89,6 +92,11 @@ PIC_counting <- function(cells,
       ## get start and end position
       f1s <- GenomicRanges::resize(f1_sub, width = 1, fix = "start")
       f1e <- GenomicRanges::resize(f1_sub, width = 1, fix = "end")
+      
+      ## extend the exact insertion site 
+      f1s <- GenomicRanges::resize(f1s, width = extend_size, fix = "center")
+      f1e <- GenomicRanges::resize(f1e, width = extend_size, fix = "center")
+      
       
       overlaped_s <- GenomicRanges::findOverlaps(f1s, peak_sets, select = "first")
       overlaped_e <- GenomicRanges::findOverlaps(f1e, peak_sets, select = "first")
