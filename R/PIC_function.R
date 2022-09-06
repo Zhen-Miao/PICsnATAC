@@ -23,7 +23,7 @@
 #' @param extend_size How long should we extend the exact insertion site as accessible 
 #'  window 
 #'
-#' @return The counted cell by peak matrix
+#' @return The peak by cell PIC count matrix
 #' @export
 #'
 #' @examples
