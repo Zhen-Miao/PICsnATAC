@@ -21,7 +21,7 @@
 #' @param load_full Whether to load the whole fragment.tsv.gz file into memory. If set
 #'  to FALSE, the function will load it dynamically to save RAM
 #'
-#' @return The counted cell by peak matrix
+#' @return The peak by cell PIC count matrix
 #' @export
 #'
 #' @examples
