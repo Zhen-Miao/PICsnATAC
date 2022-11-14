@@ -2,7 +2,7 @@
 % Please edit documentation in R/Insertion_rates_and_DAR_test.R
 \name{obs_to_insertion_MLE}
 \alias{obs_to_insertion_MLE}
-\title{Title Calculate the insertion rate from observed PIC counts}
+\title{Calculate the insertion rate from observed PIC counts}
 \usage{
 obs_to_insertion_MLE(pic_mat, capturing_rates, plen)
 }
@@ -17,5 +17,5 @@ obs_to_insertion_MLE(pic_mat, capturing_rates, plen)
 The optimized insertion rate
 }
 \description{
-Title Calculate the insertion rate from observed PIC counts
+Calculate the insertion rate from observed PIC counts
 }

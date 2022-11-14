@@ -1,5 +1,5 @@
 
-#' Title get theoretical snATAC-seq distribution under condition 1
+#' get theoretical snATAC-seq distribution under condition 1
 #'
 #' @param insertion_rate The insertion rate (per base pair)
 #' @param peak_length The width of peak
@@ -9,6 +9,7 @@
 #'
 #' @examples
 #' @keywords internal
+#' @noRd
 .get_theoretical_c1 <- function(insertion_rate,
                                 peak_length = 500){
   lambda_ = insertion_rate * peak_length
@@ -29,7 +30,7 @@
 }
 
 
-#' Title Construct an insertion-rate by mean count matrix
+#' Construct an insertion-rate by mean count matrix
 #'
 #' @param insertion_rates A vector of insertion rates (per base pair)
 #' @param peak_lengths A vector containing width of peaks
@@ -39,6 +40,7 @@
 #'
 #' @examples
 #' @keywords internal
+#' @noRd
 .insertion_to_c1 <-  function(
     insertion_rates = (1:2000)*0.01*0.001,
     peak_lengths = 4:20*50
@@ -63,7 +65,7 @@
 }
 
 
-#' Title Compute log loss for a given estimated insertion rate
+#' Compute log loss for a given estimated insertion rate
 #'
 #' @param est_inser Estimated insertion rate
 #' @param peak_length The width of peak
@@ -76,6 +78,7 @@
 #'
 #' @examples
 #' @keywords internal
+#' @noRd
 .log_loss_frag <- function(
     est_inser,
     peak_length,
@@ -119,7 +122,7 @@
 }
 
 
-#' Title Calculate the insertion rate from observed PIC counts
+#' Calculate the insertion rate from observed PIC counts
 #'
 #' @param pic_mat The observed peak by cell PIC count matrix
 #' @param capturing_rates A vector of estimated capturing rates for each cell
@@ -149,7 +152,7 @@ obs_to_insertion_MLE <- function(
   return(optim_results)
 }
 
-#' Title Compute p value for DAR test between two cell types
+#' Compute p value for DAR test between two cell types
 #'
 #' @param pic_mat The observed peak by cell PIC count matrix
 #' @param capturing_rates A vector of estimated capturing rates for each cell

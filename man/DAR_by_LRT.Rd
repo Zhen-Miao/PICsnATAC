@@ -2,9 +2,14 @@
 % Please edit documentation in R/Insertion_rates_and_DAR_test.R
 \name{DAR_by_LRT}
 \alias{DAR_by_LRT}
-\title{Title Compute p value for DAR test between two cell types}
+\title{Compute p value for DAR test between two cell types}
 \usage{
-DAR_by_LRT(pic_mat, capturing_rates, cell_type_labels)
+DAR_by_LRT(
+  pic_mat,
+  capturing_rates,
+  cell_type_labels,
+  estimation_approach = "MLE"
+)
 }
 \arguments{
 \item{pic_mat}{The observed peak by cell PIC count matrix}
@@ -12,10 +17,12 @@ DAR_by_LRT(pic_mat, capturing_rates, cell_type_labels)
 \item{capturing_rates}{A vector of estimated capturing rates for each cell}
 
 \item{cell_type_labels}{A vector specifying cell type labels}
+
+\item{estimation_approach}{The approach for}
 }
 \value{
 Log loss value
 }
 \description{
-Title Compute p value for DAR test between two cell types
+Compute p value for DAR test between two cell types
 }
