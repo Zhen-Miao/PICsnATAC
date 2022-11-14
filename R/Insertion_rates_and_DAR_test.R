@@ -154,6 +154,7 @@ obs_to_insertion_MLE <- function(
 #' @param pic_mat The observed peak by cell PIC count matrix
 #' @param capturing_rates A vector of estimated capturing rates for each cell
 #' @param cell_type_labels A vector specifying cell type labels
+#' @param estimation_approach The approach for
 #'
 #' @return Log loss value
 #' @export
@@ -162,7 +163,8 @@ obs_to_insertion_MLE <- function(
 DAR_by_LRT <- function(
     pic_mat,
     capturing_rates,
-    cell_type_labels
+    cell_type_labels,
+    estimation_approach = 'MLE'
 ){
   ## save some values
   n_pks <- dim(pic_mat)[1]
@@ -183,19 +185,25 @@ DAR_by_LRT <- function(
   capturing_rates_1 <- capturing_rates[cell_type_labels == ct_uniq[1]]
   capturing_rates_2 <- capturing_rates[cell_type_labels == ct_uniq[2]]
 
-  ll_all_mle <- obs_to_insertion_MLE(pic_mat = pic_mat,
+  ## MLE
+  if(estimation_approach== 'MLE'){
+    ## likelihood under the null model
+    ll_all_mle <- obs_to_insertion_MLE(pic_mat = pic_mat,
                                        capturing_rates = capturing_rates,
                                        plen = plen)
-
-  ll_full_1_mle <- obs_to_insertion_MLE(pic_mat = pic_mat_1,
+    ## likelihood under the full model (alternative)
+    ll_full_1_mle <- obs_to_insertion_MLE(pic_mat = pic_mat_1,
                                           capturing_rates = capturing_rates[cell_type_labels == ct_uniq[1]],
                                           plen = plen)
 
-  ll_full_2_mle <- obs_to_insertion_MLE(pic_mat = pic_mat_2,
+    ll_full_2_mle <- obs_to_insertion_MLE(pic_mat = pic_mat_2,
                                           capturing_rates = capturing_rates[cell_type_labels == ct_uniq[2]],
                                           plen = plen)
 
-  p_val <- pchisq(2*(ll_full_1_mle+ll_full_2_mle - ll_all_mle), df = 1,lower.tail = F)
+    ## p value is obtained by chi-squared statistics
+    p_val <- pchisq(2*(ll_full_1_mle+ll_full_2_mle - ll_all_mle), df = 1,lower.tail = F)
+  }
+
   return(p_val)
 }
 
