@@ -1,0 +1,66 @@
+---
+title: "Vignette 5 -- DAR analysis with PIC parametric framework"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = '/Users/Shared/Example_dataset1/')
+```
+
+### Content 
+This Vignette contains an example to conduct DAR analysis with PIC parametric framework. We developed a statistical framework to test the differential accessible regions (DARs) between cell types. Our framework incorporated the distribution of snATAC-seq count data (PIC count, can also run on fragment count), and will have a higher power in detecting DARs in snATAC-seq data
+
+### Required libraries 
+Please make sure the following libraries are installed and loaded for the analysis. 
+```{r eval=FALSE}
+library('data.table')
+library('GenomicRanges')
+library('Matrix')
+library('PICsnATAC')
+```
+
+### Input files
+
+The PIC test framework requires the following input:
+
+  * peak by cell PIC count matrix (`pic_mat`)
+  * cell type labels (`cell_types`)
+
+Note, please refer to our vignettes for obtaining `pic_mat`, and clustering and annotation 
+can be conducted with Seurat, ArchR, or other pipelines. Below, we describe the two steps of the test
+
+### Cell-specific capturing rate estimation
+As described in the manuscript, in the snATAC-seq data, each cell may have largely variant 
+capturing rate (sequencing depth), and here, we will compute the caputuring rate in each cell
+while separating the effect of cell type-specific open probability
+```{r eval=FALSE}
+r_by_ct_out = get_r_by_ct_mat_pq(cell_type_set = unique(cell_types),r_by_c = pic_mat,
+                                 cell_type_labels = cell_types,n_features_per_cell = dim(pic_mat)[1])
+```
+
+The object `r_by_ct_out` is a list with two elements,
+
+* **p_by_t** Peak by cell type matrix, each element represents the open probability of the peak in the corresponding cell type
+* **q_vec** A vector of cell-specific capturing rate
+
+The second element will be the input of the next function
+
+### DAR test
+With the cell-specific caputuring rate, we can now execute our DAR test function
+```{r eval=FALSE}
+p_vals = DAR_by_LRT(pic_mat = pic_mat,capturing_rates = r_by_ct_out$q_vec,cell_type_labels = cell_types)
+```
+The output is a p value vector, specifying the p value for each peak. In addition, you can calculate the mean
+log fold change after adjusting for the caputuring rate to add additional criteria for determing the set of DAR
+
+
+### Reference
+If you used PIC-snATAC counting in your analysis, please cite our manuscript:
+
+Miao Z, Kim J. Is single nucleus ATAC-seq accessibility a qualitative or quantitative measurement?. _bioRxiv_. 2022.
+
+

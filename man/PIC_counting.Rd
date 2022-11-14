@@ -4,7 +4,14 @@
 \alias{PIC_counting}
 \title{Title PIC-count}
 \usage{
-PIC_counting(cells, fragment_tsv_gz_file_location, peak_sets)
+PIC_counting(
+  cells,
+  fragment_tsv_gz_file_location,
+  peak_sets,
+  deduplicate = FALSE,
+  load_full = TRUE,
+  extend_size = 9
+)
 }
 \arguments{
 \item{cells}{The cell barcode lables as a Character vector}
@@ -12,9 +19,21 @@ PIC_counting(cells, fragment_tsv_gz_file_location, peak_sets)
 \item{fragment_tsv_gz_file_location}{The 10X Cell Ranger output fragment.tsv.gz file location}
 
 \item{peak_sets}{The set of peaks as a GenomicRanges object}
+
+\item{deduplicate}{Whether to include deduplicate step where within the same cell,
+fragments with identical start and end location will be deduplicated. This is
+usually unnecessisary from Cell Ranger ATAC output, since Cell Ranger ATAC has
+already deduplicated the fragments. But for dsc-ATAC-seq data, this step will
+be helpful and recommended.}
+
+\item{load_full}{Whether to load the whole fragment.tsv.gz file into memory. If set
+to FALSE, the function will load it dynamically to save RAM}
+
+\item{extend_size}{How long should we extend the exact insertion site as accessible
+window}
 }
 \value{
-The counted cell by peak matrix
+The peak by cell PIC count matrix
 }
 \description{
 Title PIC-count
