@@ -47,4 +47,6 @@ For additional example, please check the following vignettes
 
 [Vignette 3: PIC counting in ArchR workflow.](https://htmlpreview.github.io/?https://github.com/Zhen-Miao/PIC-snATAC/blob/main/vignettes/vignette-3----PIC-counting-in-ArchR-workflow.html)
 
-[vignette 4: PIC counting with dsc-ATAC-seq data.](https://github.com/Zhen-Miao/PIC-snATAC/blob/main/vignettes/vignette-4----PIC-counting-with-dsc-ATAC-seq-data.html)
+[vignette 4: PIC counting with dsc-ATAC-seq data.](https://htmlpreview.github.io/?https://github.com/Zhen-Miao/PIC-snATAC/blob/main/vignettes/vignette-4----PIC-counting-with-dsc-ATAC-seq-data.html)
+
+[vignette 5: DAR test with PIC parametric test framework.](https://htmlpreview.github.io/?https://github.com/Zhen-Miao/PIC-snATAC/blob/main/vignettes/vignette-5----DAR-analysis-with-PIC-parametric-framework.html)
