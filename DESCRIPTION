@@ -11,7 +11,10 @@ Imports:
   IRanges,
   GenomicRanges,
   methods,
-  Matrix
+  Matrix,
+  data.table,
+  Rsamtools,
+  GenomeInfoDb
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

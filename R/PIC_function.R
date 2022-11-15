@@ -5,11 +5,13 @@
 #'
 #' @importFrom methods as
 #' @import dplyr
-#' @import data.table
+#' @importFrom data.table fread
 #' @import GenomicRanges
+#' @importFrom GenomeInfoDb seqlevels
 #' @import Rsamtools
 #' @importFrom IRanges subsetByOverlaps
 #' @import Matrix
+#' @importFrom utils read.csv str
 #' @param cells The cell barcode lables as a Character vector
 #' @param fragment_tsv_gz_file_location The 10X Cell Ranger output fragment.tsv.gz file location
 #' @param peak_sets The set of peaks as a GenomicRanges object
@@ -39,28 +41,33 @@ PIC_counting <- function(cells,
   n_features <- length(peak_sets)
 
   ## if load full files
-  if(load_full){
+  if (load_full) {
     ## create output object
     out_summ <- rep(list(), length = n_cells)
     names(out_summ) <- cells
 
     ## load fragment files
-    f1 <- data.table::fread(fragment_tsv_gz_file_location,header = F,
-                            select = 1:4)
+    f1 <- data.table::fread(fragment_tsv_gz_file_location,
+      header = F,
+      select = 1:4
+    )
     ## data.table show inconsistent performance
     # setnames(f1, c('seqname','start','end','cell_barcode'))
     # f1 <- f1[f1$cell_barcode %in% cells]
 
     ## convert to data.frame format
     f1 <- as.data.frame(f1)
-    colnames(f1) <- c('seqname','start','end','cell_barcode')
-    f1 <- f1[f1$cell_barcode %in% cells,]
-    f1 = GenomicRanges::makeGRangesFromDataFrame(f1,
-                                                 keep.extra.columns=T)
+    colnames(f1) <- c("seqname", "start", "end", "cell_barcode")
+    f1 <- f1[f1$cell_barcode %in% cells, ]
+    f1 <- GenomicRanges::makeGRangesFromDataFrame(f1,
+      keep.extra.columns = T
+    )
 
     ## pre-sort fragments
-    f1_s <- subsetByOverlaps(f1, ranges = peak_sets,
-                             maxgap = ceiling(extend_size/2))
+    f1_s <- subsetByOverlaps(f1,
+      ranges = peak_sets,
+      maxgap = ceiling(extend_size / 2)
+    )
     rm(f1)
     gc()
     n_subset <- n_cells %/% 500 + 1
@@ -86,7 +93,7 @@ PIC_counting <- function(cells,
       f1_sub <- f1k[[jj]][f1k[[jj]]$cell_barcode == ii, ]
 
       ## deduplicate f1_sub
-      if(deduplicate){
+      if (deduplicate) {
         f1_sub <- unique(f1_sub)
       }
 
@@ -131,26 +138,24 @@ PIC_counting <- function(cells,
     pkdf <- as.data.frame(peak_sets)
     fname <- paste(pkdf$seqnames, ":", pkdf$start, "-", pkdf$end, sep = "")
     rownames(out_mat) <- fname
-
-
   } else {
     ## use Rsamtools to load data
-    tbx <- TabixFile(fl)
+    tbx <- TabixFile(fragment_tsv_gz_file_location)
 
     ## get ranges for each chromosome
     slevels <- seqlevels(peak_sets)
     grl <- split(peak_sets, seqnames(peak_sets))
     grl <- sort(grl)
     n_features_seq <- sapply(grl, length)
-    param <- matrix(nrow = length(slevels),ncol = 3)
-    colnames(param) <- c('seqname', 'start', 'end')
+    param <- matrix(nrow = length(slevels), ncol = 3)
+    colnames(param) <- c("seqname", "start", "end")
     rownames(param) <- slevels
     param <- as.data.frame(param)
     param$seqname <- slevels
 
-    for(sl in slevels){
-      param[sl,'start'] <- min(start(grl[[sl]]))
-      param[sl,'end'] <- max(end(grl[[sl]]))
+    for (sl in slevels) {
+      param[sl, "start"] <- min(start(grl[[sl]]))
+      param[sl, "end"] <- max(end(grl[[sl]]))
     }
     param <- GenomicRanges::makeGRangesFromDataFrame(param)
 
@@ -159,35 +164,35 @@ PIC_counting <- function(cells,
     names(out_mat_seq) <- slevels
 
     ## load data for each chromosome
-    for(sind in seq_along(slevels)){
+    for (sind in seq_along(slevels)) {
       seq_name <- slevels[sind]
-      res <- scanTabix(tbx, param=param[sind])
+      res <- scanTabix(tbx, param = param[sind])
       # length(res[[1]])
-      f1_seq <- read.csv(textConnection(res[[1]]), sep="\t", header=FALSE)
-      f1_seq <- f1_seq[,1:4]
-      colnames(f1_seq) <- c('seqname','start','end','cell_barcode')
-      f1_seq <- f1_seq[f1_seq$cell_barcode %in% cells,]
-      f1_seq = GenomicRanges::makeGRangesFromDataFrame(f1_seq,
-                                                       keep.extra.columns=T)
+      f1_seq <- read.csv(textConnection(res[[1]]), sep = "\t", header = FALSE)
+      f1_seq <- f1_seq[, 1:4]
+      colnames(f1_seq) <- c("seqname", "start", "end", "cell_barcode")
+      f1_seq <- f1_seq[f1_seq$cell_barcode %in% cells, ]
+      f1_seq <- GenomicRanges::makeGRangesFromDataFrame(f1_seq,
+        keep.extra.columns = T
+      )
 
       ## create temporal output object for each seqlevels
       out_summ <- rep(list(), length = n_cells)
       names(out_summ) <- cells
 
-      zero_vec <- rep(0,length = n_features_seq[seq_name])
+      zero_vec <- rep(0, length = n_features_seq[seq_name])
       ## count for each cell
       for (i in 1:n_cells) {
-
         ii <- cells[i]
         f1_sub <- f1_seq[f1_seq$cell_barcode == ii, ]
 
-        if(length(f1_sub) == 0){
+        if (length(f1_sub) == 0) {
           out_summ[[ii]] <- zero_vec
           next
         }
 
         ## deduplicate f1_sub
-        if(deduplicate){
+        if (deduplicate) {
           f1_sub <- unique(f1_sub)
         }
 
@@ -205,8 +210,10 @@ PIC_counting <- function(cells,
         counts <- as.data.frame(table(ol), stringsAsFactors = F)
         counts$ol <- as.integer(counts$ol)
 
-        out_summ[[ii]] <- sparseVector(x = counts$Freq, i = counts$ol,
-                                       length = n_features_seq[seq_name])
+        out_summ[[ii]] <- sparseVector(
+          x = counts$Freq, i = counts$ol,
+          length = n_features_seq[seq_name]
+        )
         # print(i)
       }
       out_summ2 <- lapply(out_summ, as, "vector")
@@ -230,9 +237,9 @@ PIC_counting <- function(cells,
     out_mat <- do.call(rbind, out_mat_seq)
     pkdf_full <- as.data.frame(peak_sets)
     fname_full <- paste(pkdf_full$seqnames, ":", pkdf_full$start, "-", pkdf_full$end,
-                   sep = "")
-    outmat <- outmat[fname_full,]
-
+      sep = ""
+    )
+    outmat <- outmat[fname_full, ]
   }
   return(out_mat)
 }
