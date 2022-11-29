@@ -87,6 +87,7 @@ for(s in seq_along(inputFiles)){
   cells_sample_name_trunc <- sub(".*\\#","",cells_sample)
 
   peak_sets <- proj@peakSet ## the peak set, from MACS2 peak calling results
+  names(peak_sets) <- NULL ## remove the peakset names 
   fragment_tsv_gz_file_location <- inputFiles[s]
 
   pic_mat[[s]] <- PIC_counting(
@@ -95,7 +96,7 @@ for(s in seq_along(inputFiles)){
     peak_sets = peak_sets)
   
   ## change back the cell names to match with original input
-  colnames(pic_mat) <- cells_sample
+  colnames(pic_mat[[s]]) <- cells_sample
 }
 
 ## we can run the following codes to get the complete peak by cell matrix
