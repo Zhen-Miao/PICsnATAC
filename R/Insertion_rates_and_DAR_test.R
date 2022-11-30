@@ -176,6 +176,14 @@ DAR_by_LRT <- function(pic_mat,
   ## pk length
   plen <- rep(500, times = n_pks)
 
+  ## cap the counts at 5
+  cts <- pic_mat@x
+  cts[cts >= 10] <- 0 ## counts greater than 10 are likely artifact
+  cts[cts > 5] <- 5
+  pic_mat@x <- cts
+  rm(cts)
+
+  ## split the matrix by cell types
   pic_mat <- as.matrix(pic_mat)
   pic_mat_1 <- pic_mat[, cell_type_labels == ct_uniq[1]]
   pic_mat_2 <- pic_mat[, cell_type_labels == ct_uniq[2]]
