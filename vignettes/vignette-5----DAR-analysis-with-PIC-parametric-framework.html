@@ -430,7 +430,7 @@ rm1 &lt;- rowSums(pic_mat[,cell_types == cell_type_set[1] ] %*%
   sum(cell_types == cell_type_set[1])
 rm2 &lt;- rowSums(pic_mat[,cell_types == cell_type_set[2] ] %*%
         diag(1 / capturing_rates[cell_types == cell_type_set[2] ])) / 
-  sum(cell_types == cell_type_set[1])
+  sum(cell_types == cell_type_set[2])
 
 ## sequencing depth corrected log fold change
 log_fc_depth_corrected = log(rm2+0.0001) - log(rm1+0.0001) # 0.0001 is added to prevent log(0)
