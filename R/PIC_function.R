@@ -34,7 +34,7 @@ PIC_counting <- function(cells,
                          peak_sets,
                          deduplicate = FALSE,
                          load_full = TRUE,
-                         extend_size = 9) {
+                         extend_size = 5) {
 
   ## create the object to save output
   n_cells <- length(cells)
@@ -54,6 +54,9 @@ PIC_counting <- function(cells,
     ## data.table show inconsistent performance
     # setnames(f1, c('seqname','start','end','cell_barcode'))
     # f1 <- f1[f1$cell_barcode %in% cells]
+
+    ##
+    print('all fragment data loaded')
 
     ## convert to data.frame format
     f1 <- as.data.frame(f1)
@@ -80,6 +83,9 @@ PIC_counting <- function(cells,
     rm(f1_s)
     gc()
 
+    ## progress bar
+    progress_bar = txtProgressBar(min = 0, max = n_cells, initial = 0)
+    print('computing peak vector for each cell')
 
     ## counting
     for (i in 1:n_cells) {
@@ -105,7 +111,6 @@ PIC_counting <- function(cells,
       f1s <- GenomicRanges::resize(f1s, width = extend_size, fix = "center")
       f1e <- GenomicRanges::resize(f1e, width = extend_size, fix = "center")
 
-
       overlaped_s <- GenomicRanges::findOverlaps(f1s, peak_sets, select = "first")
       overlaped_e <- GenomicRanges::findOverlaps(f1e, peak_sets, select = "first")
       overlaped_e_nodc <- overlaped_e
@@ -117,8 +122,11 @@ PIC_counting <- function(cells,
       counts$ol <- as.integer(counts$ol)
 
       out_summ[[ii]] <- sparseVector(x = counts$Freq, i = counts$ol, length = n_features)
-      # print(i)
+      # progress
+      setTxtProgressBar(progress_bar,i)
     }
+
+    close(progress_bar)
 
     ## convert to a sparse matrix
     out_summ2 <- lapply(out_summ, as, "vector")
@@ -163,6 +171,11 @@ PIC_counting <- function(cells,
     out_mat_seq <- rep(list(), length = length(slevels))
     names(out_mat_seq) <- slevels
 
+    ## print job status
+    print('loading data for each chromosome')
+    progress_bar = txtProgressBar(min = 0, max = length(slevels), initial = 0)
+    print('computing peak vector for each chromosome')
+
     ## load data for each chromosome
     for (sind in seq_along(slevels)) {
       seq_name <- slevels[sind]
@@ -175,6 +188,8 @@ PIC_counting <- function(cells,
       f1_seq <- GenomicRanges::makeGRangesFromDataFrame(f1_seq,
         keep.extra.columns = T
       )
+
+      setTxtProgressBar(progress_bar,sind)
 
       ## create temporal output object for each seqlevels
       out_summ <- rep(list(), length = n_cells)
@@ -234,6 +249,9 @@ PIC_counting <- function(cells,
       fname <- paste(pkdf$seqnames, ":", pkdf$start, "-", pkdf$end, sep = "")
       rownames(out_mat_seq[[seq_name]]) <- fname
     }
+
+    ## close progress bar
+    close(progress_bar)
     out_mat <- do.call(rbind, out_mat_seq)
     pkdf_full <- as.data.frame(peak_sets)
     fname_full <- paste(pkdf_full$seqnames, ":", pkdf_full$start, "-", pkdf_full$end,
