@@ -62,6 +62,17 @@ PIC_counting <- function(cells,
     f1 <- as.data.frame(f1)
     colnames(f1) <- c("seqname", "start", "end", "cell_barcode")
     f1 <- f1[f1$cell_barcode %in% cells, ]
+    
+    ## require the end to be larger than start -- this is useful for s3-ATAC-seq data
+    ### if end smaller than start
+    f1_sub1 = f1[f1$start-1 < f1$end,]
+    f1_sub2 = f1[f1$start-1 >= f1$end,]
+    f1_sub2s = f1_sub2$start
+    f1_sub2$start = f1_sub2$end
+    f1_sub2$end = f1_sub2s
+    f1 = rbind(f1_sub1, f1_sub2)
+    rm(f1_sub1); rm(f1_sub2); rm(f1_sub2s)
+    
     f1 <- GenomicRanges::makeGRangesFromDataFrame(f1,
       keep.extra.columns = T
     )
