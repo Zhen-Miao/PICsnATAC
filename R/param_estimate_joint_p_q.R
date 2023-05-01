@@ -5,6 +5,7 @@
 #' @description For a snATAC-seq (binary) dataset, compute the peak-specific open probability
 #'  and cell-specific capturing rates
 #'
+#' @importFrom methods is
 #' @param cell_type_set A vector containing all cell types
 #' @param r_by_c Input matrix, region (peak) by cell
 #' @param cell_type_labels A vector containing cell type labels
@@ -12,6 +13,7 @@
 #' @param p_acc The accuracy of p, default specified as 0.0005
 #' @param q_acc The accuracy of q, default specified as 0.0005
 #' @param n_max_iter The maximum iteration, default = 500
+#' @param verbose Whether to output information on processing status
 #'
 #' @return A list with two elements, \itemize{
 #'   \item p_by_t Peak by cell type matrix, each element represents the open probability of the peak in the corresponding cell type

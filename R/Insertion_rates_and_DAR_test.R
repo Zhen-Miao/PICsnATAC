@@ -124,25 +124,31 @@
 }
 
 
-#' Calculate the insertion rate from observed PIC counts
+#' Calculate the optimal loss from observed PIC counts
 #'
+#' @import parallel
 #' @param pic_mat The observed peak by cell PIC count matrix
 #' @param capturing_rates A vector of estimated capturing rates for each cell
 #' @param plen A vector of peak widths
+#' @param n_cores A numerical value to specify the number of cores in parallel
 #'
-#' @return The optimized insertion rate
+#' @return The optimized loss
 #' @export
 #'
-#' @examples
-obs_to_insertion_MLE <- function(pic_mat,
+obs_to_insertion_MLE_obj <- function(pic_mat,
                                  capturing_rates,
-                                 plen) {
+                                 plen,
+                                 n_cores) {
   n_para <- length(plen)
   optim_results <- vector(length = n_para)
 
-  ## to-do: use mclapply to speed up the process
-  for (pp in 1:n_para) {
-    optim_results[pp] <- optimize(
+  ## setup mltiple cores
+  cl <- makeCluster(n_cores)
+  clusterExport(cl, c(".log_loss_frag"))
+
+  ## iterations
+  optim_results <- mclapply(1:n_para, function(pp) {
+    optimize(
       f = .log_loss_frag,
       interval = c(0.01 * 0.001, 0.02),
       peak_length = plen[pp],
@@ -150,25 +156,69 @@ obs_to_insertion_MLE <- function(pic_mat,
       obs_pic_vec = pic_mat[pp, ],
       maximum = T
     )$objective
-  }
+  }, mc.cores = n_cores)
+  optim_results = unlist(optim_results)
+  return(optim_results)
+}
+
+
+#' Calculate the insertion rate from observed PIC counts
+#'
+#' @import parallel
+#' @param pic_mat The observed peak by cell PIC count matrix
+#' @param capturing_rates A vector of estimated capturing rates for each cell
+#' @param plen A vector of peak widths
+#' @param n_cores A numerical value to specify the number of cores in parallel
+#'
+#' @return The optimized insertion rate
+#' @export
+#'
+obs_to_insertion_MLE_lam <- function(pic_mat,
+                                     capturing_rates,
+                                     plen,
+                                     n_cores) {
+  n_para <- length(plen)
+  optim_results <- vector(length = n_para)
+
+  ## setup mltiple cores
+  cl <- makeCluster(n_cores)
+  clusterExport(cl, c(".log_loss_frag"))
+
+  ## iterations
+  optim_results <- mclapply(1:n_para, function(pp) {
+    optimize(
+      f = .log_loss_frag,
+      interval = c(0.01 * 0.001, 0.02),
+      peak_length = plen[pp],
+      capturing_rates = capturing_rates,
+      obs_pic_vec = pic_mat[pp, ],
+      maximum = T
+    )$maximum
+  }, mc.cores = n_cores)
+  optim_results = unlist(optim_results)
   return(optim_results)
 }
 
 #' Compute p value for DAR test between two cell types
 #'
+#' @import parallel
 #' @param pic_mat The observed peak by cell PIC count matrix
 #' @param capturing_rates A vector of estimated capturing rates for each cell
 #' @param cell_type_labels A vector specifying cell type labels
-#' @param estimation_approach The approach for
+#' @param estimation_approach The approach for parameter estimation
+#' @param n_cores A numerical value to specify the number of cores in parallel
 #'
 #' @return Log loss value
 #' @export
 #'
-#' @examples
 DAR_by_LRT <- function(pic_mat,
                        capturing_rates,
                        cell_type_labels,
+                       n_cores,
                        estimation_approach = "MLE") {
+  ## load library
+  requireNamespace('parallel')
+
   ## save some values
   n_pks <- dim(pic_mat)[1]
   ct_uniq <- unique(cell_type_labels)
@@ -199,22 +249,25 @@ DAR_by_LRT <- function(pic_mat,
   ## MLE
   if (estimation_approach == "MLE") {
     ## likelihood under the null model
-    ll_all_mle <- obs_to_insertion_MLE(
+    ll_all_mle <- obs_to_insertion_MLE_obj(
       pic_mat = pic_mat,
       capturing_rates = capturing_rates,
-      plen = plen
+      plen = plen,
+      n_cores = n_cores
     )
     ## likelihood under the full model (alternative)
-    ll_full_1_mle <- obs_to_insertion_MLE(
+    ll_full_1_mle <- obs_to_insertion_MLE_obj(
       pic_mat = pic_mat_1,
       capturing_rates = capturing_rates[cell_type_labels == ct_uniq[1]],
-      plen = plen
+      plen = plen,
+      n_cores = n_cores
     )
 
-    ll_full_2_mle <- obs_to_insertion_MLE(
+    ll_full_2_mle <- obs_to_insertion_MLE_obj(
       pic_mat = pic_mat_2,
       capturing_rates = capturing_rates[cell_type_labels == ct_uniq[2]],
-      plen = plen
+      plen = plen,
+      n_cores = n_cores
     )
 
     ## p value is obtained by chi-squared statistics

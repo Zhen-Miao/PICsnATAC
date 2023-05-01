@@ -3,7 +3,7 @@
 
 #' Title PIC-count
 #'
-#' @importFrom methods as
+#' @import methods
 #' @import dplyr
 #' @importFrom data.table fread
 #' @import GenomicRanges
@@ -12,6 +12,7 @@
 #' @importFrom IRanges subsetByOverlaps
 #' @import Matrix
 #' @importFrom utils read.csv str
+#' @importFrom utils setTxtProgressBar txtProgressBar
 #' @param cells The cell barcode lables as a Character vector
 #' @param fragment_tsv_gz_file_location The 10X Cell Ranger output fragment.tsv.gz file location
 #' @param peak_sets The set of peaks as a GenomicRanges object
@@ -62,7 +63,7 @@ PIC_counting <- function(cells,
     f1 <- as.data.frame(f1)
     colnames(f1) <- c("seqname", "start", "end", "cell_barcode")
     f1 <- f1[f1$cell_barcode %in% cells, ]
-    
+
     ## require the end to be larger than start -- this is useful for s3-ATAC-seq data
     ### if end smaller than start
     f1_sub1 = f1[f1$start-1 < f1$end,]
@@ -72,7 +73,7 @@ PIC_counting <- function(cells,
     f1_sub2$end = f1_sub2s
     f1 = rbind(f1_sub1, f1_sub2)
     rm(f1_sub1); rm(f1_sub2); rm(f1_sub2s)
-    
+
     f1 <- GenomicRanges::makeGRangesFromDataFrame(f1,
       keep.extra.columns = T
     )

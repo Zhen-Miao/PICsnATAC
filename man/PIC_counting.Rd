@@ -10,7 +10,7 @@ PIC_counting(
   peak_sets,
   deduplicate = FALSE,
   load_full = TRUE,
-  extend_size = 9
+  extend_size = 5
 )
 }
 \arguments{

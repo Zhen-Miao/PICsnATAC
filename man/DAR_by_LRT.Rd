@@ -8,6 +8,7 @@ DAR_by_LRT(
   pic_mat,
   capturing_rates,
   cell_type_labels,
+  n_cores,
   estimation_approach = "MLE"
 )
 }
@@ -18,7 +19,9 @@ DAR_by_LRT(
 
 \item{cell_type_labels}{A vector specifying cell type labels}
 
-\item{estimation_approach}{The approach for}
+\item{n_cores}{A numerical value to specify the number of cores in parallel}
+
+\item{estimation_approach}{The approach for parameter estimation}
 }
 \value{
 Log loss value

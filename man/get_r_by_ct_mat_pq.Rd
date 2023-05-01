@@ -11,7 +11,8 @@ get_r_by_ct_mat_pq(
   n_features_per_cell,
   p_acc = 5e-04,
   q_acc = 5e-04,
-  n_max_iter = 500
+  n_max_iter = 800,
+  verbose = T
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ get_r_by_ct_mat_pq(
 \item{q_acc}{The accuracy of q, default specified as 0.0005}
 
 \item{n_max_iter}{The maximum iteration, default = 500}
+
+\item{verbose}{Whether to output information on processing status}
 }
 \value{
 A list with two elements, \itemize{
