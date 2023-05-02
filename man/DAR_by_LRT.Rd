@@ -9,6 +9,7 @@ DAR_by_LRT(
   capturing_rates,
   cell_type_labels,
   n_cores,
+  plen = NULL,
   estimation_approach = "MLE"
 )
 }
@@ -20,6 +21,8 @@ DAR_by_LRT(
 \item{cell_type_labels}{A vector specifying cell type labels}
 
 \item{n_cores}{A numerical value to specify the number of cores in parallel}
+
+\item{plen}{A vector of peak length}
 
 \item{estimation_approach}{The approach for parameter estimation}
 }

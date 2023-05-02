@@ -16,7 +16,7 @@ obs_to_insertion_MLE_obj(pic_mat, capturing_rates, plen, n_cores)
 \item{n_cores}{A numerical value to specify the number of cores in parallel}
 }
 \value{
-The optimized loss
+The optimized loss over insertion rates from 0.01 to 20
 }
 \description{
 Calculate the optimal loss from observed PIC counts

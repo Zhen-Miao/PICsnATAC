@@ -2,18 +2,17 @@
 #' get theoretical snATAC-seq distribution under condition 1
 #'
 #' @importFrom stats convolve optimize pchisq
-#' @param insertion_rate The insertion rate (per base pair)
+#' @param insertion_rate The insertion rate (per 1000 base pairs)
 #' @param peak_length The width of peak
 #'
 #' @return A vector of length 6, representing the probability of observing 0 to >=5 counts
 #' @export
 #'
-#' @examples
 #' @keywords internal
 #' @noRd
 .get_theoretical_c1 <- function(insertion_rate,
                                 peak_length = 500) {
-  lambda_ <- insertion_rate * peak_length
+  lambda_ <- insertion_rate * peak_length/1000
   p_W_m <- vector(mode = "numeric", length = 6)
   p_W_m[1] <- exp(-0.5 * lambda_) * (2 - exp(-0.5 * lambda_)) ## prob of 0
   p_W_m[2] <- exp(-0.5 * lambda_) * (lambda_ - 2 + 2 * exp(-0.5 * lambda_))
@@ -33,16 +32,15 @@
 
 #' Construct an insertion-rate by mean count matrix
 #'
-#' @param insertion_rates A vector of insertion rates (per base pair)
+#' @param insertion_rates A vector of insertion rates (per 1000 base pairs)
 #' @param peak_lengths A vector containing width of peaks
 #'
 #' @return An insertion-rate by mean count matrix
 #' @export
 #'
-#' @examples
 #' @keywords internal
 #' @noRd
-.insertion_to_c1 <- function(insertion_rates = (1:2000) * 0.01 * 0.001,
+.insertion_to_c1 <- function(insertion_rates = (1:2000) * 0.01,
                              peak_lengths = 4:20 * 50) {
   ## initialize the matrix
   theo_mean_c1 <- matrix(
@@ -69,7 +67,7 @@
 
 #' Compute log loss for a given estimated insertion rate
 #'
-#' @param est_inser Estimated insertion rate
+#' @param est_inser Estimated insertion rate (per 1000 base pairs)
 #' @param peak_length The width of peak
 #' @param cap_fragment Maximum possible fragment (PIC) counts, default = 5
 #' @param capturing_rates A vector of capturing rates in each cell
@@ -78,7 +76,6 @@
 #' @return Log loss value
 #' @export
 #'
-#' @examples
 #' @keywords internal
 #' @noRd
 .log_loss_frag <- function(est_inser,
@@ -132,7 +129,7 @@
 #' @param plen A vector of peak widths
 #' @param n_cores A numerical value to specify the number of cores in parallel
 #'
-#' @return The optimized loss
+#' @return The optimized loss over insertion rates from 0.01 to 20
 #' @export
 #'
 obs_to_insertion_MLE_obj <- function(pic_mat,
@@ -150,7 +147,7 @@ obs_to_insertion_MLE_obj <- function(pic_mat,
   optim_results <- mclapply(1:n_para, function(pp) {
     optimize(
       f = .log_loss_frag,
-      interval = c(0.01 * 0.001, 0.02),
+      interval = c(0.01 , 20),
       peak_length = plen[pp],
       capturing_rates = capturing_rates,
       obs_pic_vec = pic_mat[pp, ],
@@ -170,7 +167,8 @@ obs_to_insertion_MLE_obj <- function(pic_mat,
 #' @param plen A vector of peak widths
 #' @param n_cores A numerical value to specify the number of cores in parallel
 #'
-#' @return The optimized insertion rate
+#' @return The optimized insertion rate (per 1000 base pairs) over insertion rates
+#'      from 0.01 to 20
 #' @export
 #'
 obs_to_insertion_MLE_lam <- function(pic_mat,
@@ -188,7 +186,7 @@ obs_to_insertion_MLE_lam <- function(pic_mat,
   optim_results <- mclapply(1:n_para, function(pp) {
     optimize(
       f = .log_loss_frag,
-      interval = c(0.01 * 0.001, 0.02),
+      interval = c(0.01, 20),
       peak_length = plen[pp],
       capturing_rates = capturing_rates,
       obs_pic_vec = pic_mat[pp, ],
@@ -207,6 +205,7 @@ obs_to_insertion_MLE_lam <- function(pic_mat,
 #' @param cell_type_labels A vector specifying cell type labels
 #' @param estimation_approach The approach for parameter estimation
 #' @param n_cores A numerical value to specify the number of cores in parallel
+#' @param plen A vector of peak length
 #'
 #' @return Log loss value
 #' @export
@@ -215,6 +214,7 @@ DAR_by_LRT <- function(pic_mat,
                        capturing_rates,
                        cell_type_labels,
                        n_cores,
+                       plen = NULL,
                        estimation_approach = "MLE") {
   ## load library
   requireNamespace('parallel')
@@ -224,7 +224,10 @@ DAR_by_LRT <- function(pic_mat,
   ct_uniq <- unique(cell_type_labels)
 
   ## pk length
-  plen <- rep(500, times = n_pks)
+  if(is.null(plen)){
+    plen <- rep(500, times = n_pks)
+  }
+
 
   ## cap the counts at 5
   cts <- pic_mat@x

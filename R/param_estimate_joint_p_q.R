@@ -21,7 +21,6 @@
 #' }
 #' @export
 #'
-#' @examples
 get_r_by_ct_mat_pq <- function(cell_type_set,
                                     r_by_c,
                                     cell_type_labels,

@@ -29,7 +29,6 @@
 #' @return The peak by cell PIC count matrix
 #' @export
 #'
-#' @examples
 PIC_counting <- function(cells,
                          fragment_tsv_gz_file_location,
                          peak_sets,
