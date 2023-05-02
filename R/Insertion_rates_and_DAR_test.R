@@ -155,6 +155,7 @@ obs_to_insertion_MLE_obj <- function(pic_mat,
     )$objective
   }, mc.cores = n_cores)
   optim_results = unlist(optim_results)
+  stopCluster(cl)
   return(optim_results)
 }
 
@@ -194,6 +195,7 @@ obs_to_insertion_MLE_lam <- function(pic_mat,
     )$maximum
   }, mc.cores = n_cores)
   optim_results = unlist(optim_results)
+  stopCluster(cl)
   return(optim_results)
 }
 
