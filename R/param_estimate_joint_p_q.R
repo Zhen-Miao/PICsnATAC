@@ -12,7 +12,7 @@
 #' @param n_features_per_cell The number of features in the matrix, can be calculated by dim(r_by_c)[1]
 #' @param p_acc The accuracy of p, default specified as 0.0005
 #' @param q_acc The accuracy of q, default specified as 0.0005
-#' @param n_max_iter The maximum iteration, default = 500
+#' @param n_max_iter The maximum iteration, default = 800
 #' @param verbose Whether to output information on processing status
 #'
 #' @return A list with two elements, \itemize{
@@ -69,7 +69,7 @@ get_r_by_ct_mat_pq <- function(cell_type_set,
     diff2 <- 1
     numiters <- 1
 
-    while ((diff1 > 0.0005 | diff2 > 0.0005) & numiters < n_max_iter) {
+    while ((diff1 > p_acc | diff2 > q_acc) & numiters < n_max_iter) {
       q0 <- itermat_q[numiters, ]
       p0 <- itermat_p[, numiters]
 
