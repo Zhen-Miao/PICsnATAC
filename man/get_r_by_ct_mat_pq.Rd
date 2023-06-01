@@ -28,7 +28,7 @@ get_r_by_ct_mat_pq(
 
 \item{q_acc}{The accuracy of q, default specified as 0.0005}
 
-\item{n_max_iter}{The maximum iteration, default = 500}
+\item{n_max_iter}{The maximum iteration, default = 800}
 
 \item{verbose}{Whether to output information on processing status}
 }
