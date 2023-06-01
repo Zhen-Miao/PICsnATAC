@@ -54,7 +54,7 @@ get_r_by_ct_mat_pq <- function(cell_type_set,
   for (gg in cell_type_set) {
     r_by_c_sub <- r_by_c[, cell_type_labels == gg]
     n_cell_sub <- dim(r_by_c_sub)[2]
-    r_by_c_sub <- as.matrix(r_by_c_sub)
+    # r_by_c_sub <- as.matrix(r_by_c_sub)
     cell_names_sub <- colnames(r_by_c_sub)
     n_reads_in_cell <- colSums(r_by_c_sub)
     n_reads_in_region <- rowSums(r_by_c_sub)
