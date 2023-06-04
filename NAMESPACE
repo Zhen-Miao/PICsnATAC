@@ -2,10 +2,12 @@
 
 export(.get_theoretical_c1)
 export(.insertion_to_c1)
-export(.log_loss_frag)
+export(.log_loss_frag_ME)
+export(.log_loss_frag_c1)
 export(DAR_by_LRT)
 export(PIC_counting)
 export(get_r_by_ct_mat_pq)
+export(obs_to_insertion_ME)
 export(obs_to_insertion_MLE_lam)
 export(obs_to_insertion_MLE_obj)
 import(GenomicRanges)

@@ -5,3 +5,4 @@
 ^LICENSE\.md$
 ^analysis_codes
 ^README\.Rmd$
+^vignettes

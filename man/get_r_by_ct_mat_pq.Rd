@@ -22,7 +22,7 @@ get_r_by_ct_mat_pq(
 
 \item{cell_type_labels}{A vector containing cell type labels}
 
-\item{n_features_per_cell}{The number of features in the matrix, can be calculated by dim(r_by_c)\link{1}}
+\item{n_features_per_cell}{The number of features in the matrix, can be calculated by nrow(r_by_c)}
 
 \item{p_acc}{The accuracy of p, default specified as 0.0005}
 

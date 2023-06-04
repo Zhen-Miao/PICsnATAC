@@ -9,7 +9,7 @@
 #' @param cell_type_set A vector containing all cell types
 #' @param r_by_c Input matrix, region (peak) by cell
 #' @param cell_type_labels A vector containing cell type labels
-#' @param n_features_per_cell The number of features in the matrix, can be calculated by dim(r_by_c)[1]
+#' @param n_features_per_cell The number of features in the matrix, can be calculated by nrow(r_by_c)
 #' @param p_acc The accuracy of p, default specified as 0.0005
 #' @param q_acc The accuracy of q, default specified as 0.0005
 #' @param n_max_iter The maximum iteration, default = 800

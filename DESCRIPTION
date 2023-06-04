@@ -6,16 +6,17 @@ Authors@R:
            comment = c(ORCID = "0000-0002-3255-9517"))
 Description: A package for paired Insertion Counting for snATAC-seq data.
 Imports: 
-  dplyr,
-  IRanges,
-  GenomicRanges,
-  methods,
-  Matrix,
-  data.table,
-  Rsamtools,
-  GenomeInfoDb,
-  parallel,
-  utils
+    dplyr,
+    IRanges,
+    GenomicRanges,
+    methods,
+    Matrix,
+    data.table,
+    Rsamtools,
+    GenomeInfoDb,
+    parallel,
+    utils,
+    tidyr
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
