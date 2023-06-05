@@ -36,13 +36,16 @@ BiocManager::install("GenomicRanges")
 
 ## Installation
 
-You can install the development version of PICsnATAC from
+You can install the most up-to-date version of PICsnATAC from
 [GitHub](https://github.com/Zhen-Miao/PIC-snATAC) with:
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("Zhen-Miao/PIC-snATAC")
 ```
+
+PIC-snATAC is a light-weight package. Installation typically takes \<5
+min.
 
 ## Example
 
