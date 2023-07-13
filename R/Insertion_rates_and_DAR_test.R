@@ -117,9 +117,9 @@
 
   p_W_s = vector(length = cap_fragment)
 
-  exp_capture = (exp(-1 * min_frag_length * insertion_rate) -
-                   exp(-1 * max_frag_length * insertion_rate)) /
-    (1 - exp(-1*peak_length * insertion_rate))
+  exp_capture = (exp(-1 * min_frag_length * insertion_rate / 1000) -
+                   exp(-1 * max_frag_length * insertion_rate / 1000)) /
+    (1 - exp(-1*peak_length * insertion_rate / 1000))
   # print(exp_capture)
 
   for(ki in seq_along(p_W_s)){
@@ -144,8 +144,8 @@
 #' Title insertion_to_c12
 #'
 #' @param insertion_rates A vector of insertion rates,
-#'  note that the insertion rate is per base, so the default range
-#'  is from 0.005 to 10
+#'  note that the insertion rate is per 1000 base, so the default range
+#'  is from 0.001 to 20
 #' @param peak_lengths A vector of peak length ranges, default is
 #'  from 200 to 1000
 #'
@@ -262,9 +262,9 @@ obs_to_insertion_MLE_obj <- function(pic_mat,
   n_para <- length(plen)
   optim_results <- vector(length = n_para)
 
-  ## setup mltiple cores
-  cl <- makeCluster(n_cores)
-  clusterExport(cl, c(".log_loss_frag_c1"))
+  # ## setup mltiple cores
+  # cl <- makeCluster(n_cores)
+  # clusterExport(cl, c(".log_loss_frag_c1"))
 
   ## iterations
   optim_results <- mclapply(1:n_para, function(pp) {
@@ -277,8 +277,10 @@ obs_to_insertion_MLE_obj <- function(pic_mat,
       maximum = T
     )$objective
   }, mc.cores = n_cores)
+
   optim_results = unlist(optim_results)
-  stopCluster(cl)
+
+  # stopCluster(cl)
   return(optim_results)
 }
 
@@ -464,9 +466,9 @@ obs_to_insertion_MLE_lam <- function(pic_mat,
   n_para <- length(plen)
   optim_results <- vector(length = n_para)
 
-  ## setup mltiple cores
-  cl <- makeCluster(n_cores)
-  clusterExport(cl, c(".log_loss_frag_c1"))
+  # ## setup mltiple cores
+  # cl <- makeCluster(n_cores)
+  # clusterExport(cl, c(".log_loss_frag_c1"))
 
   ## iterations
   optim_results <- mclapply(1:n_para, function(pp) {
@@ -480,7 +482,7 @@ obs_to_insertion_MLE_lam <- function(pic_mat,
     )$maximum
   }, mc.cores = n_cores)
   optim_results = unlist(optim_results)
-  stopCluster(cl)
+  # stopCluster(cl)
   return(optim_results)
 }
 
