@@ -61,7 +61,18 @@ PIC_counting <- function(cells,
     ## convert to data.frame format
     f1 <- as.data.frame(f1)
     colnames(f1) <- c("seqname", "start", "end", "cell_barcode")
-    f1 <- f1[f1$cell_barcode %in% cells, ]
+
+    cells_filtered <- f1$cell_barcode %in% cells
+    n_cells_fragment_file <- sum(cells_filtered)
+
+    ## error when no cells found in the fragment file
+    if(n_cells_fragment_file < 1){
+      stop('Cell barcodes not found in fragment files, please check input')
+    }else if(n_cells_fragment_file < 10){
+      warning('Fewer than 10 cells found in fragment files, please consider checking input')
+    }
+
+    f1 <- f1[cells_filtered, ]
 
     ## require the end to be larger than start -- this is useful for s3-ATAC-seq data
     ### if end smaller than start
