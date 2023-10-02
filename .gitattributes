@@ -1,2 +1,4 @@
+# ignore .html files
+*.html linguist-vendored
 # Apply override to all files and directories in the directory
 vignettes/** linguist-documentation
