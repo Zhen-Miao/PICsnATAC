@@ -21,11 +21,23 @@ knitr::opts_chunk$set(
 
 The goal of PICsnATAC is to accurately quantify snATAC-seq data. The two key components are: 
 
-1. **Constructing cell-by-peak matrix** with Paired Insertion Counting (PIC). 
+#### 1. <span style="text-decoration:underline">Constructing cell-by-peak matrix</span> with Paired Insertion Counting (PIC). 
 
-_This counting approach is a uniform counting choice for various assays, including 10X Genomics snATAC-seq, sci-ATAC-seq, SNARE-seq, dsc-ATAC-seq, s3-ATAC-seq, and scNANO-ATAC._
+##### **Motivation**:
 
-2. Conducting **Differential Accessible Region (DAR)** identification analysis using the PIC matrix. 
+There are two common counting approaches for snATAC-seq data, **fragment-based counting** and **insertion-based counting**. They generate inconsistent results (see figure below).
+
+![ ](man/figures/README-F1c.svg){width=45%} ![ ](man/figures/README-F1d.svg){width=45%}
+
+_Here, we present PIC as a uniform counting choice for various assays, including 10X Genomics snATAC-seq, sci-ATAC-seq, SNARE-seq, dsc-ATAC-seq, s3-ATAC-seq, and scNANO-ATAC._
+
+#### 2. Conducting <span style="text-decoration:underline">Differential Accessible Region (DAR)</span> identification analysis using the PIC matrix. 
+
+##### **Motivation**: 
+
+Two insertion events with correct primer configurations are required for one viable fragment. We derived the **probability distribution of fragment count** as a function of insertion rate and derived a **model-based insertion rate estimation framework**. We further applied a likelihood ratio test approach to detect DARs between populations. 
+
+![ ](man/figures/README-F1a.png){width=85%}
 
 _Building upon our model-based insertion rate estimation framework, this analysis provides a more sensitive test of DAR between cell groups (cell types)._ 
 
