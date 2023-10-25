@@ -27,7 +27,8 @@ The goal of PICsnATAC is to accurately quantify snATAC-seq data. The two key com
 
 There are two common counting approaches for snATAC-seq data, **fragment-based counting** and **insertion-based counting**. They generate inconsistent results (see figure below).
 
-![ ](man/figures/README-F1c.svg){width=45%} ![ ](man/figures/README-F1d.svg){width=45%}
+![ ](man/figures/README-F1c.svg){width=280} 
+![ ](man/figures/README-F1d.svg){width=280}
 
 _Here, we present PIC as a uniform counting choice for various assays, including 10X Genomics snATAC-seq, sci-ATAC-seq, SNARE-seq, dsc-ATAC-seq, s3-ATAC-seq, and scNANO-ATAC._
 
