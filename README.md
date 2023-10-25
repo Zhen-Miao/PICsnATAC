@@ -17,9 +17,10 @@ There are two common counting approaches for snATAC-seq data,
 **fragment-based counting** and **insertion-based counting**. They
 generate inconsistent results (see figure below).
 
-<img src="man/figures/README-F1c.svg" width="280" />
-<img src="man/figures/README-F1d.svg" width="280" />
-
+<div style="display: flex;">
+  <img src="man/figures/README-F1c.svg" width="280"  style="margin-right: 10px;">
+  <img src="man/figures/README-F1d.svg" width="280" >
+</div>
 *Here, we present PIC as a uniform counting choice for various assays,
 including 10X Genomics snATAC-seq, sci-ATAC-seq, SNARE-seq,
 dsc-ATAC-seq, s3-ATAC-seq, and scNANO-ATAC.*
