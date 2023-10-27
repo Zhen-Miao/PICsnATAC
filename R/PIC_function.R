@@ -12,10 +12,13 @@
 #' @importFrom IRanges subsetByOverlaps
 #' @import Matrix
 #' @importFrom utils read.csv str
-#' @importFrom utils setTxtProgressBar txtProgressBar
+#' @importFrom progress progress_bar
 #' @param cells The cell barcode lables as a Character vector
-#' @param fragment_tsv_gz_file_location The 10X Cell Ranger output fragment.tsv.gz file location
-#' @param peak_sets The set of peaks as a GenomicRanges object
+#' @param fragment_tsv_gz_file_location The 10X Cell Ranger output
+#'  fragment.tsv.gz file location. This can usually be found at the /out
+#'  directory from Cell Ranger output
+#' @param peak_sets The set of peaks as a GenomicRanges object. This will be
+#'  the features for the data matrix.
 #' @param deduplicate Whether to include deduplicate step where within the same cell,
 #'  fragments with identical start and end location will be deduplicated. This is
 #'  usually unnecessisary from Cell Ranger ATAC output, since Cell Ranger ATAC has
@@ -62,8 +65,8 @@ PIC_counting <- function(cells,
     f1 <- as.data.frame(f1)
     colnames(f1) <- c("seqname", "start", "end", "cell_barcode")
 
-    cells_filtered <- f1$cell_barcode %in% cells
-    n_cells_fragment_file <- sum(cells_filtered)
+    cells_retain <- f1$cell_barcode %in% cells
+    n_cells_fragment_file <- sum(cells_retain)
 
     ## error when no cells found in the fragment file
     if(n_cells_fragment_file < 1){
@@ -72,7 +75,7 @@ PIC_counting <- function(cells,
       warning('Fewer than 10 cells found in fragment files, please consider checking input')
     }
 
-    f1 <- f1[cells_filtered, ]
+    f1 <- f1[cells_retain, ]
 
     ## require the end to be larger than start -- this is useful for s3-ATAC-seq data
     ### if end smaller than start
@@ -106,8 +109,10 @@ PIC_counting <- function(cells,
     gc()
 
     ## progress bar
-    progress_bar = txtProgressBar(min = 0, max = n_cells, initial = 0)
-    print('computing peak vector for each cell')
+    progress_bar <- progress_bar$new(
+        total = n_cells,
+        format = 'computing peak vector for each cell'
+        )
 
     ## counting
     for (i in 1:n_cells) {
@@ -145,10 +150,10 @@ PIC_counting <- function(cells,
 
       out_summ[[ii]] <- sparseVector(x = counts$Freq, i = counts$ol, length = n_features)
       # progress
-      setTxtProgressBar(progress_bar,i)
+      progress_bar$tick()
     }
 
-    close(progress_bar)
+
 
     ## convert to a sparse matrix
     out_summ2 <- lapply(out_summ, as, "vector")
@@ -195,8 +200,13 @@ PIC_counting <- function(cells,
 
     ## print job status
     print('loading data for each chromosome')
-    progress_bar = txtProgressBar(min = 0, max = length(slevels), initial = 0)
-    print('computing peak vector for each chromosome')
+
+    ## progress bar
+    progress_bar <- progress_bar$new(
+      total = length(slevels),
+      format = 'computing peak vector for each chromosome',
+      clear = FALSE
+    )
 
     ## load data for each chromosome
     for (sind in seq_along(slevels)) {
@@ -211,7 +221,7 @@ PIC_counting <- function(cells,
         keep.extra.columns = T
       )
 
-      setTxtProgressBar(progress_bar,sind)
+      progress_bar$tick()
 
       ## create temporal output object for each seqlevels
       out_summ <- rep(list(), length = n_cells)
@@ -272,8 +282,7 @@ PIC_counting <- function(cells,
       rownames(out_mat_seq[[seq_name]]) <- fname
     }
 
-    ## close progress bar
-    close(progress_bar)
+
     out_mat <- do.call(rbind, out_mat_seq)
     pkdf_full <- as.data.frame(peak_sets)
     fname_full <- paste(pkdf_full$seqnames, ":", pkdf_full$start, "-", pkdf_full$end,
