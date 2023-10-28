@@ -256,9 +256,10 @@ PIC_counting <- function(cells,
     gc()
 
     ## progress bar
-    progress_bar <- progress_bar$new(
+    pb <- progress_bar$new(
         total = n_cells,
-        format = 'computing peak vector for each cell'
+        format = 'computing peak vector for each cell',
+        clear = FALSE
         )
 
     ## counting
@@ -283,7 +284,7 @@ PIC_counting <- function(cells,
                                     extend_size = extend_size,
                                     n_features = n_features)
       # progress
-      progress_bar$tick()
+      pb$tick()
     }
 
     ## convert to a sparse matrix
@@ -324,7 +325,7 @@ PIC_counting <- function(cells,
     print('loading data for each chromosome')
 
     ## progress bar
-    progress_bar <- progress_bar$new(
+    pb <- progress_bar$new(
       total = length(slevels),
       format = 'computing peak vector for each chromosome',
       clear = FALSE
@@ -343,7 +344,7 @@ PIC_counting <- function(cells,
         keep.extra.columns = T
       )
 
-      progress_bar$tick()
+      pb$tick()
 
       ## create temporal output object for each seqlevels
       out_summ <- rep(list(), length = n_cells)
