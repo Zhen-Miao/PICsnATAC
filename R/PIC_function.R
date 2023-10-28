@@ -258,7 +258,8 @@ PIC_counting <- function(cells,
     ## progress bar
     pb <- progress_bar$new(
         total = n_cells,
-        format = 'computing peak vector for each cell'
+        format = 'computing peak vector for each cell',
+        clear = FALSE
         )
 
     ## counting
@@ -343,7 +344,7 @@ PIC_counting <- function(cells,
         keep.extra.columns = T
       )
 
-      progress_bar$tick()
+      pb$tick()
 
       ## create temporal output object for each seqlevels
       out_summ <- rep(list(), length = n_cells)
