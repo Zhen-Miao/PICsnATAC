@@ -123,14 +123,14 @@ list_to_sparseMatrix <- function(list_s_vetors, n_features) {
     sparse_matrices <- lapply(chunks, make_sparse_matrix_from_sparse_vector)
     sparse_matrices <- do.call(cbind, sparse_matrices)
   }else{
-    sparse_matrices <- make_sparse_matrix_from_sparse_vector(chunks)
+    sparse_matrices <- make_sparse_matrix_from_sparse_vector(list_s_vetors)
   }
   return(sparse_matrices)
 }
 
 #' Title PIC-counting data matrix
 #'
-#' @import methods
+#' @importFrom methods is
 #' @importFrom data.table fread
 #' @import GenomicRanges
 #' @importFrom GenomeInfoDb seqlevels
@@ -138,13 +138,14 @@ list_to_sparseMatrix <- function(list_s_vetors, n_features) {
 #' @importFrom IRanges subsetByOverlaps
 #' @import Matrix
 #' @importFrom utils read.csv str
-#' @importFrom progress progress_bar
+#' @import progress
 #' @param cells The cell barcode lables as a Character vector
 #' @param fragment_tsv_gz_file_location The 10X Cell Ranger output
 #'  fragment.tsv.gz file location. This can usually be found at the /out
 #'  directory from Cell Ranger output
 #' @param peak_sets The set of peaks as a GenomicRanges object. This will be
-#'  the features for the data matrix.
+#'  the features for the data matrix. Alternatively, this can be a data.frame
+#'  and the function will convert it into a GenomicRanges object
 #' @param deduplicate Whether to include deduplicate step where within the same cell,
 #'  fragments with identical start and end location will be deduplicated. This is
 #'  usually unnecessisary from Cell Ranger ATAC output, since Cell Ranger ATAC has
@@ -165,7 +166,7 @@ PIC_counting <- function(cells,
                          peak_sets,
                          deduplicate = FALSE,
                          load_full = TRUE,
-                         extend_size = 5,
+                         extend_size = 5L,
                          verbose = TRUE) {
 
   if (!requireNamespace("GenomicRanges", quietly = TRUE)) {
@@ -174,7 +175,7 @@ PIC_counting <- function(cells,
   }
 
   ## check input
-  if (extend_size < 0 | !is.integer(extend_size)){
+  if (extend_size < 0 ){
     stop('extend_size has to be a positive integer!')
   }
 
@@ -185,8 +186,22 @@ PIC_counting <- function(cells,
     stop('cell names are empty or contain NA values!')
   }
 
-  if (!is(peak_sets, "GRanges")){
-    stop("The peak_sets object need to be a GRanges object.")
+  ## we accpt peak_sets to be a GRanges or we convert it into one
+  if (!methods::is(peak_sets, "GRanges")){
+
+    ## if colnames not specified, we specify by order
+    if(is.null(colnames(peak_sets)) |
+       !(all(c('seqname', 'start', 'end') %in% colnames(peak_sets)))){
+      colnames(peak_sets) <- c('seqname', 'start', 'end')
+    }
+
+    ## convert into GRanges
+    peak_sets <- try(GenomicRanges::makeGRangesFromDataFrame(peak_sets),
+                     silent = TRUE)
+    if (inherits(peak_sets, "try-error")) {
+      stop("An error occurred in trying to convert peak_sets
+          into a GRanges object, please check input")
+    }
   }
 
   ## create the object to save output
@@ -224,7 +239,7 @@ PIC_counting <- function(cells,
     )
 
     ## pre-sort fragments
-    f1_s <- GenomicRanges::subsetByOverlaps(f1,
+    f1_s <- IRanges::subsetByOverlaps(f1,
       ranges = peak_sets,
       maxgap = ceiling(extend_size / 2)
     )

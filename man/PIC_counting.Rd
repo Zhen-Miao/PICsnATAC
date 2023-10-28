@@ -10,7 +10,7 @@ PIC_counting(
   peak_sets,
   deduplicate = FALSE,
   load_full = TRUE,
-  extend_size = 5,
+  extend_size = 5L,
   verbose = TRUE
 )
 }
@@ -22,7 +22,8 @@ fragment.tsv.gz file location. This can usually be found at the /out
 directory from Cell Ranger output}
 
 \item{peak_sets}{The set of peaks as a GenomicRanges object. This will be
-the features for the data matrix.}
+the features for the data matrix. Alternatively, this can be a data.frame
+and the function will convert it into a GenomicRanges object}
 
 \item{deduplicate}{Whether to include deduplicate step where within the same cell,
 fragments with identical start and end location will be deduplicated. This is
