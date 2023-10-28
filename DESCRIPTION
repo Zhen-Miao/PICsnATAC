@@ -16,7 +16,8 @@ Imports:
     GenomeInfoDb,
     parallel,
     utils,
-    tidyr
+    tidyr,
+    progress
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
