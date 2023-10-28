@@ -5,7 +5,7 @@
 #' @description For a snATAC-seq (binary) dataset, compute the peak-specific open probability
 #'  and cell-specific capturing rates
 #'
-#' @importFrom methods is
+#' @importFrom methods is as
 #' @param cell_type_set A vector containing all cell types
 #' @param r_by_c Input matrix, region (peak) by cell
 #' @param cell_type_labels A vector containing cell type labels

@@ -2,7 +2,8 @@
 % Please edit documentation in R/Insertion_rates_and_DAR_test.R
 \name{.insertion_to_c12}
 \alias{.insertion_to_c12}
-\title{Title insertion_to_c12}
+\title{given insertion rate, calculate theoretical distribution under condition 1
+and 2}
 \usage{
 .insertion_to_c12(
   insertion_rates = (1:2000) * 0.01,
@@ -17,11 +18,25 @@
 }
 \arguments{
 \item{insertion_rates}{A vector of insertion rates,
-note that the insertion rate is per base, so the default range
-is from 0.005 to 10}
+note that the insertion rate is per 1000 base, so the default range
+is from 0.001 to 20}
 
 \item{peak_lengths}{A vector of peak length ranges, default is
 from 200 to 1000}
+
+\item{pad_length}{how many bp outside of peaks can insertions happen,
+default = 0}
+
+\item{dirs}{directions. default (-1, 1)}
+
+\item{count_type}{what type of count should we estimate, default 'fragment'}
+
+\item{min_frag_length}{minimum of fragment length, default 25}
+
+\item{max_frag_length}{maximum of fragment length, default 600}
+
+\item{cap_insertion}{maximum number of insertions that can simultaneously
+happen within one peak region}
 }
 \value{
 A insertion rate by peak length matrix, and each
@@ -29,5 +44,6 @@ element of the matrix corresponds to the number of expected fragments
 #' @noRd
 }
 \description{
-Title insertion_to_c12
+given insertion rate, calculate theoretical distribution under condition 1
+and 2
 }

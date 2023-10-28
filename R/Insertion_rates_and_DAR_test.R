@@ -141,13 +141,22 @@
 
 
 
-#' Title insertion_to_c12
+#' given insertion rate, calculate theoretical distribution under condition 1
+#'  and 2
 #'
 #' @param insertion_rates A vector of insertion rates,
 #'  note that the insertion rate is per 1000 base, so the default range
 #'  is from 0.001 to 20
 #' @param peak_lengths A vector of peak length ranges, default is
 #'  from 200 to 1000
+#' @param pad_length how many bp outside of peaks can insertions happen,
+#'  default = 0
+#' @param dirs directions. default (-1, 1)
+#' @param count_type what type of count should we estimate, default 'fragment'
+#' @param min_frag_length minimum of fragment length, default 25
+#' @param max_frag_length maximum of fragment length, default 600
+#' @param cap_insertion maximum number of insertions that can simultaneously
+#'  happen within one peak region
 #'
 #' @return A insertion rate by peak length matrix, and each
 #' element of the matrix corresponds to the number of expected fragments
