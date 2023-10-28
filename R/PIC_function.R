@@ -109,7 +109,7 @@ PIC_counting <- function(cells,
     gc()
 
     ## progress bar
-    progress_bar <- progress_bar$new(
+    pb <- progress_bar$new(
         total = n_cells,
         format = 'computing peak vector for each cell'
         )
@@ -150,7 +150,7 @@ PIC_counting <- function(cells,
 
       out_summ[[ii]] <- sparseVector(x = counts$Freq, i = counts$ol, length = n_features)
       # progress
-      progress_bar$tick()
+      pb$tick()
     }
 
 
@@ -202,7 +202,7 @@ PIC_counting <- function(cells,
     print('loading data for each chromosome')
 
     ## progress bar
-    progress_bar <- progress_bar$new(
+    pb <- progress_bar$new(
       total = length(slevels),
       format = 'computing peak vector for each chromosome',
       clear = FALSE
