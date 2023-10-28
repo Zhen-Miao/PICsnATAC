@@ -92,7 +92,7 @@ PIC_counting <- function(cells,
     )
 
     ## pre-sort fragments
-    f1_s <- subsetByOverlaps(f1,
+    f1_s <- IRanges::subsetByOverlaps(f1,
       ranges = peak_sets,
       maxgap = ceiling(extend_size / 2)
     )
