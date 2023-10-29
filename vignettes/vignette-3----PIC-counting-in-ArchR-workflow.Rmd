@@ -5,7 +5,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir = '/Users/Shared/Example_dataset1/')
+knitr::opts_knit$set(root.dir = "/Users/Shared/Example_dataset1/")
 ```
 
 ### content 
@@ -14,11 +14,11 @@ This Vignette contains an example to use PIC counting in ArchR workflow.
 ### required libraries 
 Please make sure the following libraries are installed and loaded for the analysis. 
 ```{r eval=FALSE}
-library('data.table')
-library('GenomicRanges')
-library('Matrix')
-library('PICsnATAC')
-library('ArchR')
+library("data.table")
+library("GenomicRanges")
+library("Matrix")
+library("PICsnATAC")
+library("ArchR")
 ```
 
 ### Input files
@@ -36,10 +36,10 @@ addArchRGenome("hg19")
 ArrowFiles <- createArrowFiles(
   inputFiles = inputFiles,
   sampleNames = names(inputFiles),
-  minTSS = 4, #Dont set this too high because you can always increase later
-  minFrags = 1000, 
-  addTileMat = F,
-  addGeneScoreMat = F
+  minTSS = 4, # Dont set this too high because you can always increase later
+  minFrags = 1000,
+  addTileMat = FALSE,
+  addGeneScoreMat = FALSE
 )
 ```
 
@@ -49,8 +49,8 @@ We have this section as ArchR tutorial recommended. But this is option and pleas
 ```{r eval=FALSE}
 doubScores <- addDoubletScores(
   input = ArrowFiles,
-  k = 10, #Refers to how many cells near a "pseudo-doublet" to count.
-  knnMethod = "UMAP", #Refers to the embedding to use for nearest neighbor search.
+  k = 10, # Refers to how many cells near a "pseudo-doublet" to count.
+  knnMethod = "UMAP", # Refers to the embedding to use for nearest neighbor search.
   LSIMethod = 1
 )
 ```
@@ -58,43 +58,45 @@ doubScores <- addDoubletScores(
 ### Create an ArchRproject
 ```{r eval=FALSE}
 proj <- ArchRProject(
-  ArrowFiles = ArrowFiles, 
+  ArrowFiles = ArrowFiles,
   outputDirectory = "HemeTutorial",
-  copyArrows = TRUE #This is recommened so that you maintain an unaltered copy for later usage.
+  copyArrows = TRUE # This is recommened so that you maintain an unaltered
+  ## copy for later usage.
 )
 ```
 
 ### Peak calling with MACS2
-Please make sure MACS2 is installed before running this. ArchR also supports other peak calling methods, please refer to ArchR manual for additional options. 
+Please make sure MACS2 is installed before running this. ArchR also supports 
+other peak calling methods, please refer to ArchR manual for additional options. 
 ```{r eval=FALSE}
 pathToMacs2 <- findMacs2()
 proj <- addReproduciblePeakSet(
-    ArchRProj = proj, 
-    pathToMacs2 = pathToMacs2
+  ArchRProj = proj,
+  pathToMacs2 = pathToMacs2
 )
 ```
 
 ### Obtain PIC matrix from ArchRproject input
 Here, we have three samples, we compute the PIC matrix for each of them separately. 
 ```{r eval=FALSE}
-pic_mat = rep(list(), length = length(inputFiles))
-for(s in seq_along(inputFiles)){
-  
+pic_mat <- rep(list(), length = length(inputFiles))
+for (s in seq_along(inputFiles)) {
   ## select one sample
-  sample_sel <- names(inputFiles)[s] 
+  sample_sel <- names(inputFiles)[s]
   allCells <- rownames(getCellColData(proj)) ## all cells after filtering
   cells_sample <- allCells[startsWith(allCells, sample_sel)]
-  cells_sample_name_trunc <- sub(".*\\#","",cells_sample)
+  cells_sample_name_trunc <- sub(".*\\#", "", cells_sample)
 
   peak_sets <- proj@peakSet ## the peak set, from MACS2 peak calling results
-  names(peak_sets) <- NULL ## remove the peakset names 
+  names(peak_sets) <- NULL ## remove the peakset names
   fragment_tsv_gz_file_location <- inputFiles[s]
 
   pic_mat[[s]] <- PIC_counting(
     cells = cells_sample_name_trunc,
     fragment_tsv_gz_file_location = fragment_tsv_gz_file_location,
-    peak_sets = peak_sets)
-  
+    peak_sets = peak_sets
+  )
+
   ## change back the cell names to match with original input
   colnames(pic_mat[[s]]) <- cells_sample
 }
@@ -105,17 +107,18 @@ for(s in seq_along(inputFiles)){
 
 # pic_mat_comb <- do.call(cbind, pic_mat)
 # pic_mat_comb <- pic_mat_comb[,rownames(getCellColData(proj))]
-
 ```
 
 ### Add PIC matrix to ArchRproject object 
 Here we iteratively add PIC matrix to the ArchR object
 ```{r eval=FALSE}
-for(s in seq_along(inputFiles)){
-  ArchR:::.addMatToArrow(mat = pic_mat[[s]],
-                       ArrowFile = ArrowFiles[s],
-                       group = 'PIC',
-                       binarize = FALSE)
+for (s in seq_along(inputFiles)) {
+  ArchR:::.addMatToArrow(
+    mat = pic_mat[[s]],
+    ArrowFile = ArrowFiles[s],
+    group = "PIC",
+    binarize = FALSE
+  )
 }
 ```
 
@@ -128,7 +131,6 @@ proj <- saveArchRProject(ArchRProj = proj)
 
 ## to load object
 proj <- loadArchRProject(path = "HemeTutorial")
-
 ```
 
 

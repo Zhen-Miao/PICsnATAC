@@ -6,7 +6,6 @@ Authors@R:
            comment = c(ORCID = "0000-0002-3255-9517"))
 Description: A package for paired Insertion Counting for snATAC-seq data.
 Imports: 
-    dplyr,
     IRanges,
     GenomicRanges,
     methods,

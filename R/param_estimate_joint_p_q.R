@@ -2,33 +2,36 @@
 
 
 #' Get region (peak) by cell type matrix and per cell capturing rate
-#' @description For a snATAC-seq (binary) dataset, compute the peak-specific open probability
+#' @description For a snATAC-seq (binary) dataset, compute the peak-specific
+#'  open probability
 #'  and cell-specific capturing rates
 #'
 #' @importFrom methods is as
 #' @param cell_type_set A vector containing all cell types
 #' @param r_by_c Input matrix, region (peak) by cell
 #' @param cell_type_labels A vector containing cell type labels
-#' @param n_features_per_cell The number of features in the matrix, can be calculated by nrow(r_by_c)
+#' @param n_features_per_cell The number of features in the matrix,
+#'  can be calculated by nrow(r_by_c)
 #' @param p_acc The accuracy of p, default specified as 0.0005
 #' @param q_acc The accuracy of q, default specified as 0.0005
 #' @param n_max_iter The maximum iteration, default = 800
 #' @param verbose Whether to output information on processing status
 #'
 #' @return A list with two elements, \itemize{
-#'   \item p_by_t Peak by cell type matrix, each element represents the open probability of the peak in the corresponding cell type
+#'   \item p_by_t Peak by cell type matrix, each element represents
+#'    the open probability of the peak in the corresponding cell type
 #'   \item q_vec A vector of cell-specific capturing rate
 #' }
 #' @export
 #'
 get_r_by_ct_mat_pq <- function(cell_type_set,
-                                    r_by_c,
-                                    cell_type_labels,
-                                    n_features_per_cell,
-                                    p_acc = 0.0005,
-                                    q_acc = 0.0005,
-                                    n_max_iter = 800,
-                                    verbose = T) {
+                               r_by_c,
+                               cell_type_labels,
+                               n_features_per_cell,
+                               p_acc = 0.0005,
+                               q_acc = 0.0005,
+                               n_max_iter = 800,
+                               verbose = TRUE) {
   ## require cell names provided
   if (is.null(colnames(r_by_c))) {
     stop("the peak by cell matrix has to have column names")
@@ -37,7 +40,10 @@ get_r_by_ct_mat_pq <- function(cell_type_set,
   ## save data to matrix
   itermat_q_by_type <- vector(length = dim(r_by_c)[2])
   names(itermat_q_by_type) <- colnames(r_by_c)
-  itermat_p_by_type <- matrix(nrow = n_features_per_cell, ncol = length(cell_type_set))
+  itermat_p_by_type <- matrix(
+    nrow = n_features_per_cell,
+    ncol = length(cell_type_set)
+  )
   colnames(itermat_p_by_type) <- cell_type_set
 
   p_by_t_new <- matrix(nrow = n_features_per_cell, ncol = length(cell_type_set))
@@ -54,7 +60,6 @@ get_r_by_ct_mat_pq <- function(cell_type_set,
   for (gg in cell_type_set) {
     r_by_c_sub <- r_by_c[, cell_type_labels == gg]
     n_cell_sub <- dim(r_by_c_sub)[2]
-    # r_by_c_sub <- as.matrix(r_by_c_sub)
     cell_names_sub <- colnames(r_by_c_sub)
     n_reads_in_cell <- colSums(r_by_c_sub)
     n_reads_in_region <- rowSums(r_by_c_sub)
@@ -63,13 +68,13 @@ get_r_by_ct_mat_pq <- function(cell_type_set,
     itermat_q <- matrix(NA, nrow = n_max_iter, ncol = n_cell_sub)
     itermat_p <- matrix(NA, nrow = n_features_per_cell, ncol = n_max_iter)
 
-    itermat_q[1, ] <- n_reads_in_cell / max(n_reads_in_cell) # starting value for q
+    itermat_q[1, ] <- n_reads_in_cell / max(n_reads_in_cell) # starting for q
     itermat_p[, 1] <- n_reads_in_region / n_cell_sub # starting value for p
     diff1 <- 1
     diff2 <- 1
     numiters <- 1
 
-    while ((diff1 > p_acc | diff2 > q_acc) & numiters < n_max_iter) {
+    while ((diff1 > p_acc || diff2 > q_acc) && numiters < n_max_iter) {
       q0 <- itermat_q[numiters, ]
       p0 <- itermat_p[, numiters]
 
@@ -86,9 +91,11 @@ get_r_by_ct_mat_pq <- function(cell_type_set,
       itermat_p[, numiters] <- p0new
       itermat_q[numiters, ] <- q0new
 
-      # print(numiters)
-      diff1 <- sum(abs(itermat_p[, numiters] - itermat_p[, numiters - 1]) / abs(itermat_p[, numiters]), na.rm = T) / n_features_per_cell
-      diff2 <- sum(abs(itermat_q[numiters, ] - itermat_q[numiters - 1, ]) / abs(itermat_q[numiters, ]), na.rm = T) / n_cell_sub
+      diff1 <- sum(abs(itermat_p[, numiters] - itermat_p[, numiters - 1]) /
+                     abs(itermat_p[, numiters]), na.rm = TRUE) /
+        n_features_per_cell
+      diff2 <- sum(abs(itermat_q[numiters, ] - itermat_q[numiters - 1, ]) /
+                     abs(itermat_q[numiters, ]), na.rm = TRUE) / n_cell_sub
     }
 
     ## remove columns that contain na values
@@ -98,15 +105,14 @@ get_r_by_ct_mat_pq <- function(cell_type_set,
 
     mat_to_shrink2 <- itermat_q
     mat_to_shrink2 <- mat_to_shrink2[!is.na(rowSums(mat_to_shrink2)), ]
-    itermat_q_by_type[cell_names_sub] <- mat_to_shrink2[dim(mat_to_shrink2)[1], ]
+    itermat_q_by_type[cell_names_sub] <- mat_to_shrink2[dim(mat_to_shrink2)[1],]
 
     ## print progress
-    if(verbose){
+    if (verbose) {
       print(paste(gg, " completed"))
       print(paste("diff1 = ", diff1))
       print(paste("diff2 = ", diff2))
     }
-
   }
   return(list(p_by_t = itermat_p_by_type, q_vec = itermat_q_by_type))
 }

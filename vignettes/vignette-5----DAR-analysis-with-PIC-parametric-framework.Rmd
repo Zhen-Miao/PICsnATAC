@@ -8,7 +8,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir = '/Users/Shared/Example_dataset1/')
+knitr::opts_knit$set(root.dir = "/Users/Shared/Example_dataset1/")
 ```
 
 ### Content 
@@ -17,10 +17,10 @@ This Vignette contains an example to conduct DAR analysis with PIC parametric fr
 ### Required libraries 
 Please make sure the following libraries are installed and loaded for the analysis. 
 ```{r eval=FALSE}
-library('data.table')
-library('GenomicRanges')
-library('Matrix')
-library('PICsnATAC')
+library("data.table")
+library("GenomicRanges")
+library("Matrix")
+library("PICsnATAC")
 ```
 
 ### Input files
@@ -38,10 +38,12 @@ As described in the manuscript, in the snATAC-seq data, each cell may have large
 capturing rate (sequencing depth), and here, we will compute the caputuring rate in each cell
 while separating the effect of cell type-specific open probability
 ```{r eval=FALSE}
-r_by_ct_out = get_r_by_ct_mat_pq(cell_type_set = unique(cell_types),
-                                 r_by_c = pic_mat,
-                                 cell_type_labels = cell_types,
-                                 n_features_per_cell = dim(pic_mat)[1])
+r_by_ct_out <- get_r_by_ct_mat_pq(
+  cell_type_set = unique(cell_types),
+  r_by_c = pic_mat,
+  cell_type_labels = cell_types,
+  n_features_per_cell = dim(pic_mat)[1]
+)
 ```
 
 The object `r_by_ct_out` is a list with two elements,
@@ -54,7 +56,7 @@ The second element will be the input of the next function
 ### DAR test
 With the cell-specific caputuring rate, we can now execute our DAR test function
 ```{r eval=FALSE}
-p_vals = DAR_by_LRT(pic_mat = pic_mat,capturing_rates = r_by_ct_out$q_vec,cell_type_labels = cell_types)
+p_vals <- DAR_by_LRT(pic_mat = pic_mat, capturing_rates = r_by_ct_out$q_vec, cell_type_labels = cell_types)
 ```
 The output is a p value vector, specifying the p value for each peak. In addition, you can calculate the mean
 log fold change after adjusting for the capturing rate to add additional criteria for determining the set of DAR. The example code is provided below:
@@ -63,23 +65,25 @@ cell_type_set <- unique(cell_types)
 capturing_rates <- r_by_ct_out$q_vec
 
 ## mean accessibility values after correcting for sequencing depth
-rm1 <- rowSums(pic_mat[,cell_types == cell_type_set[1] ] %*%
-        diag(1 / capturing_rates[cell_types == cell_type_set[1] ])) / 
+rm1 <- rowSums(pic_mat[, cell_types == cell_type_set[1]] %*%
+  diag(1 / capturing_rates[cell_types == cell_type_set[1]])) /
   sum(cell_types == cell_type_set[1])
-rm2 <- rowSums(pic_mat[,cell_types == cell_type_set[2] ] %*%
-        diag(1 / capturing_rates[cell_types == cell_type_set[2] ])) / 
+rm2 <- rowSums(pic_mat[, cell_types == cell_type_set[2]] %*%
+  diag(1 / capturing_rates[cell_types == cell_type_set[2]])) /
   sum(cell_types == cell_type_set[2])
 
 ## sequencing depth corrected log fold change
-log_fc_depth_corrected = log(rm2+0.0001) - log(rm1+0.0001) # 0.0001 is added to prevent log(0)
+log_fc_depth_corrected <- log(rm2 + 0.0001) - log(rm1 + 0.0001) # 0.0001 is
+## added to prevent log(0)
 
-## in situations sequencing depth disparity is not a concern, we can also 
+## in situations sequencing depth disparity is not a concern, we can also
 ## use the uncorrected mean accessibility value, the codes are
 
-rm1_unc = rowMeans(pic_mat[,cell_types == cell_type_set[1]])
-rm2_unc = rowMeans(pic_mat[,cell_types == cell_type_set[2]])
+rm1_unc <- rowMeans(pic_mat[, cell_types == cell_type_set[1]])
+rm2_unc <- rowMeans(pic_mat[, cell_types == cell_type_set[2]])
 
-log_fc_uncorrected = log(rm2_unc+0.0001) -  log(rm1_unc+0.0001) # 0.0001 is added to prevent log(0)
+log_fc_uncorrected <- log(rm2_unc + 0.0001) - log(rm1_unc + 0.0001) # 0.0001
+## is added to prevent log(0)
 ```
 
 

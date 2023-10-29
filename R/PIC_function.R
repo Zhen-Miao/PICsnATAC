@@ -12,39 +12,41 @@
 #'
 #' @return data.frame containing fragments that are filtered by cell barcodes
 #' @export
-load_fragments <- function(fragment_tsv_gz_file_location, cells, verbose = T) {
+load_fragments <- function(
+    fragment_tsv_gz_file_location, cells, verbose = TRUE) {
   f1 <- data.table::fread(fragment_tsv_gz_file_location,
-        header = F,
-        select = 1:4
-      )
-      ## data.table show inconsistent performance
-      # setnames(f1, c('seqname','start','end','cell_barcode'))
-      # f1 <- f1[f1$cell_barcode %in% cells]
+    header = FALSE,
+    select = 1:4
+  )
+  ## data.table show inconsistent performance
+  # setnames(f1, c('seqname','start','end','cell_barcode'))
+  # f1 <- f1[f1$cell_barcode %in% cells]
 
-      ## convert to data.frame format
-      f1 <- as.data.frame(f1)
-      colnames(f1) <- c("seqname", "start", "end", "cell_barcode")
+  ## convert to data.frame format
+  f1 <- as.data.frame(f1)
+  colnames(f1) <- c("seqname", "start", "end", "cell_barcode")
 
-      cells_retain <- f1$cell_barcode %in% cells
-      n_cells_fragment_file <- sum(cells_retain)
+  cells_retain <- f1$cell_barcode %in% cells
+  n_cells_fragment_file <- sum(cells_retain)
 
-      ## report the proportion of reads in cell barcodes
-      prop_bcreads <- n_cells_fragment_file / dim(f1)[1]
-      if(verbose){
-        print(paste('proportion of reads in cell barcdes is ', prop_bcreads,
-                    sep = ''))
-      }
+  ## report the proportion of reads in cell barcodes
+  prop_bcreads <- n_cells_fragment_file / dim(f1)[1]
+  if (verbose) {
+    print(paste("proportion of reads in cell barcdes is ", prop_bcreads,
+      sep = ""
+    ))
+  }
 
-      ## error when no cells found in the fragment file
-      if(n_cells_fragment_file < 1){
-        stop('Cell barcodes not found in fragment files, please check input')
-      }else if(n_cells_fragment_file < 10){
-        warning('Fewer than 10 cells found in fragment files,
-                please consider checking input')
-      }
+  ## error when no cells found in the fragment file
+  if (n_cells_fragment_file < 1) {
+    stop("Cell barcodes not found in fragment files, please check input")
+  } else if (n_cells_fragment_file < 10) {
+    warning("Fewer than 10 cells found in fragment files,
+                please consider checking input")
+  }
 
-      f1 <- f1[cells_retain, ]
-      return(f1)
+  f1 <- f1[cells_retain, ]
+  return(f1)
 }
 
 
@@ -75,7 +77,7 @@ count_peaks <- function(peak_sets, filtered_fragments,
   overlaped_e_nodc[overlaped_s == overlaped_e_nodc] <- NA
   ol <- c(overlaped_s, overlaped_e_nodc)
 
-  counts <- as.data.frame(table(ol), stringsAsFactors = F)
+  counts <- as.data.frame(table(ol), stringsAsFactors = FALSE)
   counts$ol <- as.integer(counts$ol)
 
   out_vec <- sparseVector(x = counts$Freq, i = counts$ol, length = n_features)
@@ -84,24 +86,28 @@ count_peaks <- function(peak_sets, filtered_fragments,
 }
 
 
-#' make_sparse_matrix_from_sparse_vector
+#' generate a sparse matrix from a list of sparse vectors
 #'
 #' @param chunk A chunk of lists with each element being a sparseVector
 #'
 #' @return A sparseMatrix that is a column bind of all sparseVectors within
 #'  the chunk
 #' @noRd
-make_sparse_matrix_from_sparse_vector <- function(chunk) {
+make_s_matrix_from_s_vector <- function(chunk) {
   indices <- lapply(chunk, function(y) y@i)
   values <- lapply(chunk, function(y) y@x)
 
   i <- unlist(indices)
-  j <- unlist(lapply(seq_along(chunk),
-                     function(k) rep(k, length(indices[[k]]))))
+  j <- unlist(lapply(
+    seq_along(chunk),
+    function(k) rep(k, length(indices[[k]]))
+  ))
   x <- unlist(values)
 
-  s_mat <- sparseMatrix(i = i, j = j, x = x,
-                        dims = c(length(chunk[[1]]), length(chunk)))
+  s_mat <- sparseMatrix(
+    i = i, j = j, x = x,
+    dims = c(length(chunk[[1]]), length(chunk))
+  )
   return(s_mat)
 }
 
@@ -118,15 +124,49 @@ list_to_sparseMatrix <- function(list_s_vetors, n_features) {
   n_cells <- length(list_s_vetors)
   chunk_size <- ceiling(n_cells * n_features / 2^31)
 
-  if(chunk_size > 1){
-    chunks <- split(list_s_vetors, ceiling(seq_along(list_s_vetors) / chunk_size))
-    sparse_matrices <- lapply(chunks, make_sparse_matrix_from_sparse_vector)
+  if (chunk_size > 1) {
+    chunks <- split(
+      list_s_vetors,
+      ceiling(seq_along(list_s_vetors) / chunk_size)
+    )
+    sparse_matrices <- lapply(chunks, make_s_matrix_from_s_vector)
     sparse_matrices <- do.call(cbind, sparse_matrices)
-  }else{
-    sparse_matrices <- make_sparse_matrix_from_sparse_vector(list_s_vetors)
+  } else {
+    sparse_matrices <- make_s_matrix_from_s_vector(list_s_vetors)
   }
   return(sparse_matrices)
 }
+
+
+#' convert peak_set into GRanges object if input is a data.frame
+#'
+#' @param peak_sets A data.frame object of peaks that we want to use as features
+#'  The first column should be seqname, (e.g., chr1); the second column should
+#'  be the start site, and the third column should be the end site. This should
+#'  be after 5 bp and 4 bp correction of Tn5 insertion location.
+#'
+#' @return A GRanges object that contain the same information as peak_sets
+#' @export
+data_frame_to_GRanges <- function(peak_sets) {
+  ## if colnames not specified, we specify by order
+  if (is.null(colnames(peak_sets)) ||
+    !(all(c("seqname", "start", "end") %in% colnames(peak_sets)))) {
+    colnames(peak_sets) <- c("seqname", "start", "end")
+  }
+
+  ## convert into GRanges
+  peak_sets <- try(GenomicRanges::makeGRangesFromDataFrame(peak_sets),
+    silent = TRUE
+  )
+  if (inherits(peak_sets, "try-error")) {
+    stop("An error occurred in trying to convert peak_sets
+          into a GRanges object, please check input")
+  } else {
+    return(peak_sets)
+  }
+}
+
+
 
 #' Title PIC-counting data matrix
 #'
@@ -146,15 +186,17 @@ list_to_sparseMatrix <- function(list_s_vetors, n_features) {
 #' @param peak_sets The set of peaks as a GenomicRanges object. This will be
 #'  the features for the data matrix. Alternatively, this can be a data.frame
 #'  and the function will convert it into a GenomicRanges object
-#' @param deduplicate Whether to include deduplicate step where within the same cell,
-#'  fragments with identical start and end location will be deduplicated. This is
-#'  usually unnecessisary from Cell Ranger ATAC output, since Cell Ranger ATAC has
-#'  already deduplicated the fragments. But for dsc-ATAC-seq data, this step will
+#' @param deduplicate Whether to include deduplicate step where within
+#'  the same cell,
+#'  fragments with identical start and end location will be deduplicated.
+#'  This is usually unnecessisary from Cell Ranger ATAC output, since
+#'  Cell Ranger ATAC has already deduplicated the fragments.
+#'  But for dsc-ATAC-seq data, this step will
 #'  be helpful and recommended.
 #' @param load_full Whether to load the whole fragment.tsv.gz file into memory.
 #'  If set to FALSE, the function will load it dynamically to save RAM
-#' @param extend_size How long should we extend the exact insertion site as accessible
-#'  window
+#' @param extend_size How long should we extend the exact insertion site as
+#'  accessible window
 #' @param verbose Whether to output progress information including the progress
 #'  bar
 #'
@@ -168,44 +210,27 @@ PIC_counting <- function(cells,
                          load_full = TRUE,
                          extend_size = 5L,
                          verbose = TRUE) {
-
   if (!requireNamespace("GenomicRanges", quietly = TRUE)) {
     stop("The GenomicRanges package is not installed.
          Please install it using BiocManager::install('GenomicRanges').")
   }
 
   ## check input
-  if (extend_size < 0 ){
-    stop('extend_size has to be a positive integer!')
+  if (extend_size < 0) {
+    stop("extend_size has to be a positive integer!")
   }
 
   n_cells <- length(cells)
   n_features <- length(peak_sets)
 
-  if (n_cells == 0 | anyNA(cells)){
-    stop('cell names are empty or contain NA values!')
+  if (n_cells == 0 | anyNA(cells)) {
+    stop("cell names are empty or contain NA values!")
   }
 
   ## we accpt peak_sets to be a GRanges or we convert it into one
-  if (!methods::is(peak_sets, "GRanges")){
-
-    ## if colnames not specified, we specify by order
-    if(is.null(colnames(peak_sets)) |
-       !(all(c('seqname', 'start', 'end') %in% colnames(peak_sets)))){
-      colnames(peak_sets) <- c('seqname', 'start', 'end')
-    }
-
-    ## convert into GRanges
-    peak_sets <- try(GenomicRanges::makeGRangesFromDataFrame(peak_sets),
-                     silent = TRUE)
-    if (inherits(peak_sets, "try-error")) {
-      stop("An error occurred in trying to convert peak_sets
-          into a GRanges object, please check input")
-    }
+  if (!methods::is(peak_sets, "GRanges")) {
+    peak_sets <- data_frame_to_GRanges(peak_sets)
   }
-
-  ## create the object to save output
-
 
   ## if load full files
   if (load_full) {
@@ -217,19 +242,21 @@ PIC_counting <- function(cells,
     f1 <- load_fragments(
       fragment_tsv_gz_file_location = fragment_tsv_gz_file_location,
       cells = cells,
-      verbose = verbose)
+      verbose = verbose
+    )
 
     ## require the end to be larger than start -- this is useful for
     ## s3-ATAC-seq data if end smaller than start
-    f1_sub1 = f1[f1$start-1 < f1$end,]
+    f1_sub1 <- f1[f1$start - 1 < f1$end, ]
 
-    if(sum(f1$start-1 >= f1$end) >= 1){
-      f1_sub2 = f1[f1$start-1 >= f1$end,]
-      f1_sub2s = f1_sub2$start
-      f1_sub2$start = f1_sub2$end
-      f1_sub2$end = f1_sub2s
-      f1 = rbind(f1_sub1, f1_sub2)
-      rm(f1_sub2); rm(f1_sub2s)
+    if (sum(f1$start - 1 >= f1$end) >= 1) {
+      f1_sub2 <- f1[f1$start - 1 >= f1$end, ]
+      f1_sub2s <- f1_sub2$start
+      f1_sub2$start <- f1_sub2$end
+      f1_sub2$end <- f1_sub2s
+      f1 <- rbind(f1_sub1, f1_sub2)
+      rm(f1_sub2)
+      rm(f1_sub2s)
     }
     rm(f1_sub1)
 
@@ -256,11 +283,11 @@ PIC_counting <- function(cells,
     gc()
 
     ## progress bar
-    pb <- progress_bar$new(
-        total = n_cells,
-        format = 'computing peak vector for each cell',
-        clear = FALSE
-        )
+    pb <- progress::progress_bar$new(
+      total = n_cells,
+      format = "computing peak vector for each cell",
+      clear = FALSE
+    )
 
     ## counting
     for (i in 1:n_cells) {
@@ -279,23 +306,26 @@ PIC_counting <- function(cells,
       }
 
       ## count peaks
-      out_summ[[ii]] <- count_peaks(peak_sets = peak_sets,
-                                    filtered_fragments = f1_sub,
-                                    extend_size = extend_size,
-                                    n_features = n_features)
+      out_summ[[ii]] <- count_peaks(
+        peak_sets = peak_sets,
+        filtered_fragments = f1_sub,
+        extend_size = extend_size,
+        n_features = n_features
+      )
       # progress
       pb$tick()
     }
 
     ## convert to a sparse matrix
-    out_mat <- list_to_sparseMatrix(list_s_vetors = out_summ,
-                                    n_features = n_features)
+    out_mat <- list_to_sparseMatrix(
+      list_s_vetors = out_summ,
+      n_features = n_features
+    )
 
     ## add peak information into rownames of output
     pkdf <- as.data.frame(peak_sets)
     fname <- paste(pkdf$seqnames, ":", pkdf$start, "-", pkdf$end, sep = "")
     rownames(out_mat) <- fname
-
   } else {
     ## use Rsamtools to load data
     tbx <- Rsamtools::TabixFile(fragment_tsv_gz_file_location)
@@ -322,12 +352,12 @@ PIC_counting <- function(cells,
     names(out_mat_seq) <- slevels
 
     ## print job status
-    print('loading data for each chromosome')
+    print("loading data for each chromosome")
 
     ## progress bar
-    pb <- progress_bar$new(
+    pb <- progress::progress_bar$new(
       total = length(slevels),
-      format = 'computing peak vector for each chromosome',
+      format = "computing peak vector for each chromosome",
       clear = FALSE
     )
 
@@ -341,7 +371,7 @@ PIC_counting <- function(cells,
       colnames(f1_seq) <- c("seqname", "start", "end", "cell_barcode")
       f1_seq <- f1_seq[f1_seq$cell_barcode %in% cells, ]
       f1_seq <- GenomicRanges::makeGRangesFromDataFrame(f1_seq,
-        keep.extra.columns = T
+        keep.extra.columns = TRUE
       )
 
       pb$tick()
@@ -366,16 +396,19 @@ PIC_counting <- function(cells,
           f1_sub <- unique(f1_sub)
         }
 
-        out_summ[[ii]] <- count_peaks(peak_sets = peak_sets,
-                                      filtered_fragments = f1_sub,
-                                      extend_size = extend_size,
-                                      n_features = n_features)
-
+        out_summ[[ii]] <- count_peaks(
+          peak_sets = peak_sets,
+          filtered_fragments = f1_sub,
+          extend_size = extend_size,
+          n_features = n_features
+        )
       }
 
       ## convert to a sparse matrix
-      out_mat_seq[[seq_name]] <- list_to_sparseMatrix(list_s_vetors = out_summ,
-                                                      n_features = n_features)
+      out_mat_seq[[seq_name]] <- list_to_sparseMatrix(
+        list_s_vetors = out_summ,
+        n_features = n_features
+      )
 
       pkdf <- as.data.frame(grl[[seq_name]])
       fname <- paste(pkdf$seqnames, ":", pkdf$start, "-", pkdf$end, sep = "")
@@ -385,7 +418,9 @@ PIC_counting <- function(cells,
     out_mat <- do.call(rbind, out_mat_seq)
     pkdf_full <- as.data.frame(peak_sets)
     fname_full <- paste(pkdf_full$seqnames, ":", pkdf_full$start,
-                        "-", pkdf_full$end,sep = "")
+      "-", pkdf_full$end,
+      sep = ""
+    )
     outmat <- outmat[fname_full, ]
   }
   return(out_mat)

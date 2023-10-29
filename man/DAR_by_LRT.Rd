@@ -35,8 +35,10 @@ that the fragment can be amplifiable and mappable to genome. Default = 25}
 distribution, this stands for the max fragment length requirement such
 that the fragment can be amplifiable. Default = 600}
 
-\item{estimation_approach}{The approach for parameter estimation, either 'MLE'
-for condition 1 or 'ME' for condition 1+2. The 'MLE' approach is more accurate
+\item{estimation_approach}{The approach for parameter estimation,
+either 'MLE'
+for condition 1 or 'ME' for condition 1+2.
+The 'MLE' approach is more accurate
 and usually it has a higher power, but it ignores the size filtering step
 in snATAC-seq data generation. Default is 'MLE'}
 }

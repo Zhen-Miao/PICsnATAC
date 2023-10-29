@@ -4,7 +4,7 @@
 \alias{load_fragments}
 \title{Function for loading fragment files and filter by cell barcodes}
 \usage{
-load_fragments(fragment_tsv_gz_file_location, cells, verbose = T)
+load_fragments(fragment_tsv_gz_file_location, cells, verbose = TRUE)
 }
 \arguments{
 \item{fragment_tsv_gz_file_location}{The 10X Cell Ranger output
