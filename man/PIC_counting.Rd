@@ -25,17 +25,19 @@ directory from Cell Ranger output}
 the features for the data matrix. Alternatively, this can be a data.frame
 and the function will convert it into a GenomicRanges object}
 
-\item{deduplicate}{Whether to include deduplicate step where within the same cell,
-fragments with identical start and end location will be deduplicated. This is
-usually unnecessisary from Cell Ranger ATAC output, since Cell Ranger ATAC has
-already deduplicated the fragments. But for dsc-ATAC-seq data, this step will
+\item{deduplicate}{Whether to include deduplicate step where within
+the same cell,
+fragments with identical start and end location will be deduplicated.
+This is usually unnecessisary from Cell Ranger ATAC output, since
+Cell Ranger ATAC has already deduplicated the fragments.
+But for dsc-ATAC-seq data, this step will
 be helpful and recommended.}
 
 \item{load_full}{Whether to load the whole fragment.tsv.gz file into memory.
 If set to FALSE, the function will load it dynamically to save RAM}
 
-\item{extend_size}{How long should we extend the exact insertion site as accessible
-window}
+\item{extend_size}{How long should we extend the exact insertion site as
+accessible window}
 
 \item{verbose}{Whether to output progress information including the progress
 bar}

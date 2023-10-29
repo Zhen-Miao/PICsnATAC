@@ -5,7 +5,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-knitr::opts_knit$set(root.dir = '/Users/Shared/Example_dataset1/')
+knitr::opts_knit$set(root.dir = "/Users/Shared/Example_dataset1/")
 ```
 
 ### content 
@@ -14,10 +14,10 @@ This Vignette contains an example to use PIC counting with dsc-ATAC-seq data. Sp
 ### required libraries 
 Please make sure the following libraries are installed and loaded for the analysis. 
 ```{r eval=FALSE}
-library('data.table')
-library('GenomicRanges')
-library('Matrix')
-library('PICsnATAC')
+library("data.table")
+library("GenomicRanges")
+library("Matrix")
+library("PICsnATAC")
 ```
 
 ### Input files
@@ -35,34 +35,39 @@ Please make sure to download the following files for PIC counting:
 ### Cell Barcodes
 If we want to keep the cells from the publications:
 ```{r eval=FALSE}
-cm = read.table('GSE123576_mousebrain_cellData_revision.tsv', sep = '\t', header= T)
-samples =  sub("_B.*", "", cm$DropBarcode)
-cm$sample = samples
+cm <- read.table("GSE123576_mousebrain_cellData_revision.tsv",
+  sep = "\t", header = TRUE
+)
+samples <- sub("_B.*", "", cm$DropBarcode)
+cm$sample <- samples
 
-## choose sample 
-cmtsample = cm[cm$sample == 'N701_Exp119_sample1_S1',]
-cells = cmtsample$DropBarcode
+## choose sample
+cmtsample <- cm[cm$sample == "N701_Exp119_sample1_S1", ]
+cells <- cmtsample$DropBarcode
 ```
 
 ### Peak set
 If we want to keep the set of peaks from the publication:
 ```{r eval=FALSE}
-feature_df = read.csv('GSE123576_mousebrain_peaks_revision.bed', sep = '\t', header = F)
-colnames(feature_df) <- c('seqname', 'start', 'end')
-peak_sets = GenomicRanges::makeGRangesFromDataFrame(feature_df)
+feature_df <- read.csv("GSE123576_mousebrain_peaks_revision.bed",
+  sep = "\t", header = FALSE
+)
+colnames(feature_df) <- c("seqname", "start", "end")
+peak_sets <- GenomicRanges::makeGRangesFromDataFrame(feature_df)
 ```
 
 
 ### Run PIC and save output
 Please note, for dsc-ATAC-seq data, because the beads are overloaded, we recommend to set __deduplicate = TRUE__ so that we do not double count fragments. Although, based on our analysis, the fragment.tsv.gz file provided in GEO has already been de-duplicated, we still recommend doing so for all dsc-ATAC-seq data. 
 ```{r eval=FALSE}
-fragment_tsv_gz_file_location = 'GSM3507349_Mouse2-Channel1.fragments.tsv.gz'
+fragment_tsv_gz_file_location <- "GSM3507349_Mouse2-Channel1.fragments.tsv.gz"
 pic_mat <- PIC_counting(
   cells = cells,
   fragment_tsv_gz_file_location = fragment_tsv_gz_file_location,
   peak_sets = peak_sets,
-  deduplicate = TRUE)
-saveRDS(pic_mat, 'PIC_mat_1.rds') 
+  deduplicate = TRUE
+)
+saveRDS(pic_mat, "PIC_mat_1.rds")
 ## if you have multiple matrices, don't forget to save under different names
 ```
 Note if you have multiple matrices, please make sure you save them under different file names

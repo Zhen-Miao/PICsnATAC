@@ -1,31 +1,37 @@
-
 #' Title get theoretical snATAC-seq distribution under condition 1
 #'
 #' @importFrom stats convolve optimize pchisq
 #' @param insertion_rate The insertion rate (per 1000 base pairs)
 #' @param peak_length The width of peak
 #'
-#' @return A vector of length 6, representing the probability of observing 0 to >=5 counts
+#' @return A vector of length 6, representing the probability of observing
+#'  0 to >=5 counts
 #' @export
 #'
 #' @keywords internal
 #' @noRd
 .get_theoretical_c1 <- function(insertion_rate,
                                 peak_length = 500) {
-  lambda_ <- insertion_rate * peak_length/1000
+  lambda_ <- insertion_rate * peak_length / 1000
   p_W_m <- vector(mode = "numeric", length = 6)
   p_W_m[1] <- exp(-0.5 * lambda_) * (2 - exp(-0.5 * lambda_)) ## prob of 0
   p_W_m[2] <- exp(-0.5 * lambda_) * (lambda_ - 2 + 2 * exp(-0.5 * lambda_))
-  p_W_m[3] <- exp(-1 * lambda_) * (exp(0.5 * lambda_) * (lambda_^2 - 4 * lambda_ + 8) - 8) / 4
-  p_W_m[4] <- exp(-1 * lambda_) * (exp(0.5 * lambda_) * (lambda_^3 - 6 * lambda_^2 + 24 * lambda_ - 48) + 48) / 24
-  p_W_m[5] <- exp(-1 * lambda_) * (exp(0.5 * lambda_) * (lambda_^4 - 8 * lambda_^3 + 48 * lambda_^2 - 192 * lambda_ + 384) + -384) / 192
+  p_W_m[3] <- exp(-1 * lambda_) *
+    (exp(0.5 * lambda_) * (lambda_^2 - 4 * lambda_ + 8) - 8) / 4
+  p_W_m[4] <- exp(-1 * lambda_) *
+    (exp(0.5 * lambda_) *
+       (lambda_^3 - 6 * lambda_^2 + 24 * lambda_ - 48) + 48) / 24
+  p_W_m[5] <- exp(-1 * lambda_) *
+    (exp(0.5 * lambda_) * (lambda_^4 - 8 * lambda_^3 + 48 *
+      lambda_^2 - 192 * lambda_ + 384) + -384) / 192
   p_W_m[6] <- 1 - sum(p_W_m) ## prob of observing 5 or higher
 
   ## bi-allelic scenario
   p_W_m_conv <- convolve(p_W_m, rev(p_W_m), type = "open")
   p_W_m_conv[6] <- sum(p_W_m_conv[6:11])
 
-  ## return a vector of length 6, representing the probability of observing 0 to >=5 counts
+  ## return a vector of length 6, representing the probability of
+  ## observing 0 to >=5 counts
   return(p_W_m_conv[1:6])
 }
 
@@ -78,65 +84,66 @@
 #' @param cap_insertion number of insertions capped at this value, default 20
 #'
 #' return A vector of probability corresponding to different number of fragments
-#' #' @noRd
+#' @noRd
 #'
 .get_theoretical_c12 <- function(
-    insertion_rate,
-    peak_length = 1000,
-    pad_length = 0,
-    dirs = c(-1,1),
-    count_type = 'PIC',
-    min_frag_length = 25,
-    max_frag_length = 600,
-    cap_insertion = 20 ## assume there will not be more than 20 insertions in
+  insertion_rate,
+  peak_length = 1000,
+  pad_length = 0,
+  dirs = c(-1, 1),
+  count_type = "PIC",
+  min_frag_length = 25,
+  max_frag_length = 600,
+  cap_insertion = 20 ## assume there will not be more than 20 insertions in
     ## one peak region
-){
-  lambda_ = insertion_rate * peak_length / 1000
-  cap_fragment = floor(cap_insertion/2)
-  p_W_m = vector(length = cap_fragment)
+) {
+  lambda_ <- insertion_rate * peak_length / 1000
+  cap_fragment <- floor(cap_insertion / 2)
+  p_W_m <- vector(length = cap_fragment)
 
-  for(mi in seq_along(p_W_m)){
-    all_index_n = (mi+1):cap_insertion
-    p_W_m_n = vector(length = length(all_index_n))
-    for(ni in seq_along(all_index_n)){
-      index_n = all_index_n[ni]
-      p_W_m_n_ni = ( choose(index_n-1, mi) * 0.5^(index_n-1) * lambda_^index_n *
-                       exp(-1 * lambda_) ) / (factorial(index_n))
-      if(is.na(p_W_m_n_ni)){
+  for (mi in seq_along(p_W_m)) {
+    all_index_n <- (mi + 1):cap_insertion
+    p_W_m_n <- vector(length = length(all_index_n))
+    for (ni in seq_along(all_index_n)) {
+      index_n <- all_index_n[ni]
+      p_W_m_n_ni <- (choose(index_n - 1, mi) * 0.5^(index_n - 1) *
+        lambda_^index_n * exp(-1 * lambda_)) /
+        (factorial(index_n))
+      if (is.na(p_W_m_n_ni)) {
         print(insertion_rate)
-        # browser()
-      }else if(length(p_W_m_n_ni) != 1){
+      } else if (length(p_W_m_n_ni) != 1) {
         print(insertion_rate)
-        # browser()
       }
-      p_W_m_n[ni] = p_W_m_n_ni
+      p_W_m_n[ni] <- p_W_m_n_ni
     }
-    p_W_m[mi] =  sum(p_W_m_n)
+    p_W_m[mi] <- sum(p_W_m_n)
   }
-  # print(sum(p_W_m * (1:length(p_W_m))))
 
-  p_W_s = vector(length = cap_fragment)
 
-  exp_capture = (exp(-1 * min_frag_length * insertion_rate / 1000) -
-                   exp(-1 * max_frag_length * insertion_rate / 1000)) /
-    (1 - exp(-1*peak_length * insertion_rate / 1000))
-  # print(exp_capture)
+  p_W_s <- vector(length = cap_fragment)
 
-  for(ki in seq_along(p_W_s)){
-    all_index_m = ki:cap_fragment
-    p_W_s_k = vector(length = length(all_index_m))
-    for(mii in seq_along(p_W_s_k)){
-      index_m = all_index_m[mii]
-      p_W_s_k[mii] = choose(index_m, ki) * exp_capture^ki *
-        (1- exp_capture)^(index_m - ki) * p_W_m[index_m]
+  exp_capture <- (exp(
+    -1 * min_frag_length * insertion_rate / 1000
+  ) -
+    exp(-1 * max_frag_length * insertion_rate / 1000)
+  ) /
+    (1 - exp(-1 * peak_length * insertion_rate / 1000))
+
+  for (ki in seq_along(p_W_s)) {
+    all_index_m <- ki:cap_fragment
+    p_W_s_k <- vector(length = length(all_index_m))
+    for (mii in seq_along(p_W_s_k)) {
+      index_m <- all_index_m[mii]
+      p_W_s_k[mii] <- choose(index_m, ki) * exp_capture^ki *
+        (1 - exp_capture)^(index_m - ki) * p_W_m[index_m]
     }
-    p_W_s[ki] = sum(p_W_s_k)
+    p_W_s[ki] <- sum(p_W_s_k)
   }
 
   ## bi-allelic scenario, we convolve it with itself
-  p_W_s <-  c(1 - sum(p_W_s), p_W_s)
-  p_W_s_conv <- convolve(p_W_s, rev(p_W_s), type = 'open')
-  return(p_W_s_conv[2:(cap_fragment+1)])
+  p_W_s <- c(1 - sum(p_W_s), p_W_s)
+  p_W_s_conv <- convolve(p_W_s, rev(p_W_s), type = "open")
+  return(p_W_s_conv[2:(cap_fragment + 1)])
 }
 
 
@@ -161,22 +168,23 @@
 #' @return A insertion rate by peak length matrix, and each
 #' element of the matrix corresponds to the number of expected fragments
 #' #' @noRd
-.insertion_to_c12 <-  function(
-    insertion_rates = (1:2000)*0.01,
-    peak_lengths = 4:20*50,
+.insertion_to_c12 <- function(
+    insertion_rates = (1:2000) * 0.01,
+    peak_lengths = 4:20 * 50,
     pad_length = 0,
-    dirs = c(-1,1),
-    count_type = 'fragment',
+    dirs = c(-1, 1),
+    count_type = "fragment",
     min_frag_length = 25,
     max_frag_length = 600,
-    cap_insertion = 20
-){
+    cap_insertion = 20) {
   ## initialize the matrix
-  theo_mean_c12 <-  matrix(nrow = length(insertion_rates),
-                           ncol = length(peak_lengths))
+  theo_mean_c12 <- matrix(
+    nrow = length(insertion_rates),
+    ncol = length(peak_lengths)
+  )
 
-  for(iii in seq_along(insertion_rates)){
-    for(jjj in seq_along(peak_lengths)){
+  for (iii in seq_along(insertion_rates)) {
+    for (jjj in seq_along(peak_lengths)) {
       p_W_s_theo <- .get_theoretical_c12(
         insertion_rate = insertion_rates[iii],
         peak_length = peak_lengths[jjj],
@@ -185,8 +193,9 @@
         count_type = count_type,
         min_frag_length = min_frag_length,
         max_frag_length = max_frag_length,
-        cap_insertion = cap_insertion)
-      theo_mean_c12[iii,jjj] = sum(p_W_s_theo * 1:length(p_W_s_theo))
+        cap_insertion = cap_insertion
+      )
+      theo_mean_c12[iii, jjj] <- sum(p_W_s_theo * seq_along(p_W_s_theo))
     }
   }
   rownames(theo_mean_c12) <- insertion_rates
@@ -211,15 +220,15 @@
 #' @keywords internal
 #' @noRd
 .log_loss_frag_c1 <- function(est_inser,
-                           peak_length,
-                           cap_fragment = 5,
-                           capturing_rates,
-                           obs_pic_vec) {
+                              peak_length,
+                              cap_fragment = 5,
+                              capturing_rates,
+                              obs_pic_vec) {
   ## make sure cap rate has same length with obs_pic
   # if(length(capturing_rates) != length(obs_pic_vec)){
   #   stop('input capturing rate should have same length with observed vector')
   # }
-  n_cells <- length(obs_pic_vec)
+  # n_cells <- length(obs_pic_vec)
 
   p_W_s_theo <- .get_theoretical_c1(
     insertion_rate = est_inser,
@@ -236,7 +245,8 @@
     rownames(pt) <- colnames(pt) <- 0:cap_fragment
     for (ot in 0:cap_fragment) {
       for (k in ot:cap_fragment) {
-        pt[as.character(ot), as.character(k)] <- choose(k, ot) * ct^ot * (1 - ct)^(k - ot) * p_W_s_theo[k + 1]
+        pt[as.character(ot), as.character(k)] <-
+          choose(k, ot) * ct^ot * (1 - ct)^(k - ot) * p_W_s_theo[k + 1]
       }
     }
     ptv <- rowSums(pt)
@@ -265,31 +275,26 @@
 #' @export
 #'
 obs_to_insertion_MLE_obj <- function(pic_mat,
-                                 capturing_rates,
-                                 plen,
-                                 n_cores) {
+                                     capturing_rates,
+                                     plen,
+                                     n_cores) {
   n_para <- length(plen)
   optim_results <- vector(length = n_para)
-
-  # ## setup mltiple cores
-  # cl <- makeCluster(n_cores)
-  # clusterExport(cl, c(".log_loss_frag_c1"))
 
   ## iterations
   optim_results <- mclapply(1:n_para, function(pp) {
     optimize(
       f = .log_loss_frag_c1,
-      interval = c(0.01 , 20),
+      interval = c(0.01, 20),
       peak_length = plen[pp],
       capturing_rates = capturing_rates,
       obs_pic_vec = pic_mat[pp, ],
-      maximum = T
+      maximum = TRUE
     )$objective
   }, mc.cores = n_cores)
 
-  optim_results = unlist(optim_results)
+  optim_results <- unlist(optim_results)
 
-  # stopCluster(cl)
   return(optim_results)
 }
 
@@ -300,7 +305,8 @@ obs_to_insertion_MLE_obj <- function(pic_mat,
 #' @param capturing_rates A vector of estimated capturing rates for each cell
 #' @param cell_type_labels A vector of cell type lables for each cell
 #' @param cap_insertion The maximum number of insertions in a peak region.
-#' @param insertion_rates The range of insertion rates (per 1000 bp) to be considered.
+#' @param insertion_rates The range of insertion rates (per 1000 bp) to be
+#'  considered.
 #' @param peak_lengths A vector of peak lengths
 #' @param min_frag_length The value for the s1 hyperparameter in the ssPoisson
 #'   distribution, this stands for the minimum fragment length requirement such
@@ -320,9 +326,8 @@ obs_to_insertion_ME <- function(
     cap_insertion = 20,
     min_frag_length = 25,
     max_frag_length = 600,
-    insertion_rates = (1:2000)*0.01 ,
-    peak_lengths = 4:20*50
-){
+    insertion_rates = (1:2000) * 0.01,
+    peak_lengths = 4:20 * 50) {
   ## get the matrix
   c12_mat <- .insertion_to_c12(
     insertion_rates = insertion_rates,
@@ -334,13 +339,15 @@ obs_to_insertion_ME <- function(
   ## ------- group peaks into different
   ## get peak length
   pks <- data.frame(ranges = rownames(pic_mat))
-  pks <- tidyr::separate(pks, col = "ranges", sep = ':|-',
-                         into = c("chr", "start", "end"))
-  plen <- as.numeric(pks$end) - as.numeric(pks$start )
+  pks <- tidyr::separate(pks,
+    col = "ranges", sep = ":|-",
+    into = c("chr", "start", "end")
+  )
+  plen <- as.numeric(pks$end) - as.numeric(pks$start)
 
   ## assign group
   plen_gap <- peak_lengths[2] - peak_lengths[1]
-  plen_group <- ceiling((plen - peak_lengths[1]) / plen_gap) +1
+  plen_group <- ceiling((plen - peak_lengths[1]) / plen_gap) + 1
   plen_group[plen_group > length(peak_lengths)] <- length(peak_lengths)
   # names(plen_group) <- rownames(pic_mat)
 
@@ -355,9 +362,9 @@ obs_to_insertion_ME <- function(
   est_inser_all <- rep(list(), length = length(cell_types))
   names(est_inser_all) <- cell_types
 
-  for(ct in cell_types){
+  for (ct in cell_types) {
     sel_cell <- cell_type_labels == ct
-    pic_sub <- pic_mat[,sel_cell]
+    pic_sub <- pic_mat[, sel_cell]
     w_bar <- rowSums(pic_sub %*% diag(1 / capturing_rates[sel_cell]))
     w_bar <- w_bar / sum(sel_cell)
     names(w_bar) <- rownames(pic_sub)
@@ -365,10 +372,10 @@ obs_to_insertion_ME <- function(
     # save output in a list
     est_inser <- rep(list(), length = length(pgroups))
     names(est_inser) <- pgroups
-    for(pg in pgroups){
-      c12_sub <- c12_mat[,as.numeric(pg)]
+    for (pg in pgroups) {
+      c12_sub <- c12_mat[, as.numeric(pg)]
       w_bar_sub <- w_bar[plen_group == pg]
-      lkup <- outer(w_bar_sub,c12_sub, '-' )
+      lkup <- outer(w_bar_sub, c12_sub, "-")
       lkup <- abs(lkup)
 
       # for each row, look up the smallest value
@@ -378,12 +385,11 @@ obs_to_insertion_ME <- function(
     }
     est_inser <- est_inser[lengths(est_inser) != 0]
     est_inser <- unname(est_inser)
-    est_inser_all[[ct]] <- do.call('c',args = est_inser)
+    est_inser_all[[ct]] <- do.call("c", args = est_inser)
     est_inser_all[[ct]] <- est_inser_all[[ct]][rownames(pic_mat)]
-
   }
 
-  est_inser_all_matrix <- do.call(cbind,est_inser_all)
+  est_inser_all_matrix <- do.call(cbind, est_inser_all)
 
   return(est_inser_all_matrix)
 }
@@ -416,8 +422,7 @@ obs_to_insertion_ME <- function(
     max_frag_length = 600,
     cap_fragment = 10,
     capturing_rates,
-    obs_pic_vec
-){
+    obs_pic_vec) {
   ## make sure cap rate has same length with obs_pic
   # if(length(capturing_rates) != length(obs_pic_vec)){
   #   stop('input capturing rate should have same length with observed vector')
@@ -426,31 +431,34 @@ obs_to_insertion_ME <- function(
 
 
 
-  p_W_s_theo <- .get_theoretical_c12(insertion_rate = est_inser,
-                                     peak_length = peak_length,
-                                     min_frag_length = min_frag_length,
-                                     max_frag_length = max_frag_length)
+  p_W_s_theo <- .get_theoretical_c12(
+    insertion_rate = est_inser,
+    peak_length = peak_length,
+    min_frag_length = min_frag_length,
+    max_frag_length = max_frag_length
+  )
 
   ## include p(W_s = 0)
-  p_W_s_0 = 1 - sum(p_W_s_theo)
+  p_W_s_0 <- 1 - sum(p_W_s_theo)
   # if(p_W_s_0 < 0 ){
   #   stop('negative possibility of getting count 0, check the model setting')
   # }
   p_W_s_theo <- c(p_W_s_0, p_W_s_theo)
-  lg_p_W_o_t <- vector(mode = 'numeric',length = n_cells)
-  for(cell_i in 1:n_cells){
+  lg_p_W_o_t <- vector(mode = "numeric", length = n_cells)
+  for (cell_i in 1:n_cells) {
     ot <- obs_pic_vec[cell_i]
     ct <- capturing_rates[cell_i]
-    pt <- vector(mode = 'numeric',length = cap_fragment-ot+1)
+    pt <- vector(mode = "numeric", length = cap_fragment - ot + 1)
     names(pt) <- ot:cap_fragment
-    for(k in ot:cap_fragment ){
-      pt[as.character(k)] <- choose(k,ot) * ct^ot * (1-ct)^(k-ot) * p_W_s_theo[k+1]
+    for (k in ot:cap_fragment) {
+      pt[as.character(k)] <- choose(k, ot) *
+        ct^ot * (1 - ct)^(k - ot) * p_W_s_theo[k + 1]
     }
-    lg_p_W_o_t[cell_i] = log(sum(pt))
+    lg_p_W_o_t[cell_i] <- log(sum(pt))
   }
   ## remove the effect of very large value
   lg_p_W_o_t[lg_p_W_o_t < -15] <- -15
-  ll = sum(lg_p_W_o_t)
+  ll <- sum(lg_p_W_o_t)
   return(ll)
 }
 
@@ -464,8 +472,8 @@ obs_to_insertion_ME <- function(
 #' @param plen A vector of peak widths
 #' @param n_cores A numerical value to specify the number of cores in parallel
 #'
-#' @return The optimized insertion rate (per 1000 base pairs) over insertion rates
-#'      from 0.01 to 20
+#' @return The optimized insertion rate (per 1000 base pairs) over
+#'  insertion rates from 0.01 to 20
 #' @export
 #'
 obs_to_insertion_MLE_lam <- function(pic_mat,
@@ -487,10 +495,10 @@ obs_to_insertion_MLE_lam <- function(pic_mat,
       peak_length = plen[pp],
       capturing_rates = capturing_rates,
       obs_pic_vec = pic_mat[pp, ],
-      maximum = T
+      maximum = TRUE
     )$maximum
   }, mc.cores = n_cores)
-  optim_results = unlist(optim_results)
+  optim_results <- unlist(optim_results)
   # stopCluster(cl)
   return(optim_results)
 }
@@ -501,8 +509,10 @@ obs_to_insertion_MLE_lam <- function(pic_mat,
 #' @param pic_mat The observed peak by cell PIC count matrix
 #' @param capturing_rates A vector of estimated capturing rates for each cell
 #' @param cell_type_labels A vector specifying cell type labels
-#' @param estimation_approach The approach for parameter estimation, either 'MLE'
-#'   for condition 1 or 'ME' for condition 1+2. The 'MLE' approach is more accurate
+#' @param estimation_approach The approach for parameter estimation,
+#'   either 'MLE'
+#'   for condition 1 or 'ME' for condition 1+2.
+#'   The 'MLE' approach is more accurate
 #'   and usually it has a higher power, but it ignores the size filtering step
 #'   in snATAC-seq data generation. Default is 'MLE'
 #' @param n_cores A numerical value to specify the number of cores in parallel,
@@ -527,22 +537,23 @@ DAR_by_LRT <- function(pic_mat,
                        max_frag_length = 600,
                        estimation_approach = "MLE") {
   ## load library
-  requireNamespace('parallel')
+  requireNamespace("parallel")
 
   ## check input
-  if(length(capturing_rates) != length(cell_type_labels)|
-     dim(pic_mat)[2] != length(capturing_rates)){
-    stop('Number of cells do not match among inputs')
+  if (length(capturing_rates) != length(cell_type_labels) ||
+        dim(pic_mat)[2] != length(capturing_rates)) {
+     stop("Number of cells do not match among inputs")
   }
 
-  if(!(estimation_approach %in% c('MLE', 'ME'))){
-    stop('Please choose estimation_approach from MLE or ME')
+  if (!(estimation_approach %in% c("MLE", "ME"))) {
+    stop("Please choose estimation_approach from MLE or ME")
   }
 
-  if(nrow(pic_mat) * ncol(pic_mat) >= (2^31-1)){
-    print('pic_mat too large, please slice the matrix by peaks and run the test')
-    print('i.e., each time, test for different set of peaks ')
-    stop('pic_mat too large')
+  if (nrow(pic_mat) * ncol(pic_mat) >= (2^31 - 1)) {
+    print("pic_mat too large, please slice the matrix
+          by peaks and run the test")
+    print("i.e., each time, test for different set of peaks ")
+    stop("pic_mat too large")
   }
 
   ## save some values
@@ -550,13 +561,15 @@ DAR_by_LRT <- function(pic_mat,
   ct_uniq <- unique(cell_type_labels)
 
   ## pk length
-  if(is.null(plen)){
+  if (is.null(plen)) {
     pks <- data.frame(ranges = rownames(pic_mat))
-    pks <- tidyr::separate(pks, col = "ranges", sep = ':|-',
-                           into = c("chr", "start", "end"))
+    pks <- tidyr::separate(pks,
+      col = "ranges", sep = ":|-",
+      into = c("chr", "start", "end")
+    )
     plen <- as.numeric(pks$end) - as.numeric(pks$start)
     ## we only need to group peak length by n*100 bp
-    plen = ceiling(plen/100)*100
+    plen <- ceiling(plen / 100) * 100
   }
 
 
@@ -605,21 +618,22 @@ DAR_by_LRT <- function(pic_mat,
     )
 
     ## p value is obtained by chi-squared statistics
-    p_val <- pchisq(2 * (ll_full_1_mle + ll_full_2_mle - ll_all_mle), df = 1, lower.tail = F)
-  }else if(estimation_approach == "ME"){
-
+    p_val <- pchisq(2 * (ll_full_1_mle + ll_full_2_mle - ll_all_mle),
+      df = 1, lower.tail = FALSE
+    )
+  } else if (estimation_approach == "ME") {
     ## calculate estimated lambda for null hypothesis
     lamb_all <- obs_to_insertion_ME(
       pic_mat = pic_mat,
       capturing_rates = capturing_rates,
       min_frag_length = min_frag_length,
       max_frag_length = max_frag_length,
-      cell_type_labels = rep('A', length = length(capturing_rates))
+      cell_type_labels = rep("A", length = length(capturing_rates))
     )
-    lamb_all <- lamb_all[,1]
+    lamb_all <- lamb_all[, 1]
 
-    if(anyNA(lamb_all)){
-      print('NA detected in lamb_all')
+    if (anyNA(lamb_all)) {
+      print("NA detected in lamb_all")
       print(which(is.na(lamb_all)))
     }
 
@@ -631,39 +645,39 @@ DAR_by_LRT <- function(pic_mat,
       max_frag_length = max_frag_length,
       cell_type_labels = cell_type_labels
     )
-    lamb_full_1 <- lamb_full[,1]
-    lamb_full_2 <- lamb_full[,2]
+    lamb_full_1 <- lamb_full[, 1]
+    lamb_full_2 <- lamb_full[, 2]
 
 
-    if(anyNA(lamb_full_1)){
-      print('NA detected in lamb_full_1')
+    if (anyNA(lamb_full_1)) {
+      print("NA detected in lamb_full_1")
       print(which(is.na(lamb_full_1)))
-    }else if(anyNA(lamb_full_2)){
-      print('NA detected in lamb_full_2')
+    } else if (anyNA(lamb_full_2)) {
+      print("NA detected in lamb_full_2")
       print(which(is.na(lamb_full_2)))
     }
 
 
     capturing_rates_1 <- capturing_rates[cell_type_labels == ct_uniq[1]]
     capturing_rates_2 <- capturing_rates[cell_type_labels == ct_uniq[2]]
-    pic_mat_1 <- pic_mat[,cell_type_labels == ct_uniq[1]]
-    pic_mat_2 <- pic_mat[,cell_type_labels == ct_uniq[2]]
+    pic_mat_1 <- pic_mat[, cell_type_labels == ct_uniq[1]]
+    pic_mat_2 <- pic_mat[, cell_type_labels == ct_uniq[2]]
 
     ## test for each peak
-    ll_null <- vector(mode = 'numeric', length = n_pks)
+    ll_null <- vector(mode = "numeric", length = n_pks)
     p_val <- ll_full <- ll_null
 
 
-    for(pki in 1:n_pks){
+    for (pki in 1:n_pks) {
       ## calculate ll null
-      pl = plen[pki]
-      ll_null[pki] <-  .log_loss_frag_ME(
+      pl <- plen[pki]
+      ll_null[pki] <- .log_loss_frag_ME(
         est_inser = lamb_all[pki],
         peak_length = pl,
         capturing_rates = capturing_rates,
         min_frag_length = min_frag_length,
         max_frag_length = max_frag_length,
-        obs_pic_vec = pic_mat[pki,]
+        obs_pic_vec = pic_mat[pki, ]
       )
       ll_full[pki] <- .log_loss_frag_ME(
         est_inser = lamb_full_1[pki],
@@ -671,7 +685,7 @@ DAR_by_LRT <- function(pic_mat,
         capturing_rates = capturing_rates_1,
         min_frag_length = min_frag_length,
         max_frag_length = max_frag_length,
-        obs_pic_vec = pic_mat_1[pki,]
+        obs_pic_vec = pic_mat_1[pki, ]
       ) +
         .log_loss_frag_ME(
           est_inser = lamb_full_2[pki],
@@ -679,11 +693,10 @@ DAR_by_LRT <- function(pic_mat,
           capturing_rates = capturing_rates_2,
           min_frag_length = min_frag_length,
           max_frag_length = max_frag_length,
-          obs_pic_vec = pic_mat_2[pki,]
+          obs_pic_vec = pic_mat_2[pki, ]
         )
     }
-    p_val <- pchisq(2*( ll_full - ll_null), df = 1,lower.tail = F)
-
+    p_val <- pchisq(2 * (ll_full - ll_null), df = 1, lower.tail = FALSE)
   }
 
   return(p_val)

@@ -32,7 +32,8 @@ that the fragment can be amplifiable and mappable to genome. Default = 25}
 distribution, this stands for the max fragment length requirement such
 that the fragment can be amplifiable. Default = 600}
 
-\item{insertion_rates}{The range of insertion rates (per 1000 bp) to be considered.}
+\item{insertion_rates}{The range of insertion rates (per 1000 bp) to be
+considered.}
 
 \item{peak_lengths}{A vector of peak lengths}
 }
