@@ -62,7 +62,7 @@ You can install the most up-to-date version of PICsnATAC from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("Zhen-Miao/PIC-snATAC")
+devtools::install_github("Zhen-Miao/PICsnATAC")
 ```
 
 PIC-snATAC is a light-weight package. Installation typically takes \<5
@@ -74,7 +74,7 @@ This is a basic example which shows you how to construct PIC-based cell
 by peak matrix:
 
 ``` r
-library('PICsnATAC')
+library("PICsnATAC")
 
 pic_matrix <- PIC_counting(cells, fragment_tsv_gz_file_location, peak_sets)
 ```
