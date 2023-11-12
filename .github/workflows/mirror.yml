@@ -1,22 +1,18 @@
-name: Mirror to PIC-snATAC
+name: Mirroring
 
-on:
-  push:
-    branches:
-      - main  # or your default branch
+on: [push, delete]
 
 jobs:
-  mirror:
+  to_gitlab:
     runs-on: ubuntu-latest
-    steps:
-      - name: Configure Git user identity
-        run: |
-          git config --global user.email "zhenmiaonk@gmail.com"
-          git config --global user.name "Zhen Miao"
-          
-      - name: Mirror Repository
-        uses: wearerequired/git-mirror-action@v1
+    steps:                                              # <-- must use actions/checkout before mirroring!
+      - uses: actions/checkout@v3
         with:
-          source-repo: "Zhen-Miao/PICsnATAC"
-          destination-repo: "Zhen-Miao/PIC-snATAC"
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      - uses: pixta-dev/repository-mirroring-action@v1
+        with:
+          target_repo_url:
+            git@github.com:Zhen-Miao/PIC-snATAC.git
+          ssh_private_key:                             # <-- use 'secrets' to pass credential information.
+            ${{ secrets.DEPLOY_KEY }}
+
