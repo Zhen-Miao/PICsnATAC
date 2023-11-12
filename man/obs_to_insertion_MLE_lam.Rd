@@ -16,8 +16,8 @@ obs_to_insertion_MLE_lam(pic_mat, capturing_rates, plen, n_cores)
 \item{n_cores}{A numerical value to specify the number of cores in parallel}
 }
 \value{
-The optimized insertion rate (per 1000 base pairs) over insertion rates
-from 0.01 to 20
+The optimized insertion rate (per 1000 base pairs) over
+insertion rates from 0.01 to 20
 }
 \description{
 Calculate the insertion rate from observed PIC counts

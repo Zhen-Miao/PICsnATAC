@@ -52,7 +52,7 @@ Please install the dependent libraries by running the following codes
 install.packages('data.table') ## (please make sure it is newer than 1.8)
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-BiocManager::install("GenomicRanges")
+BiocManager::install(c('IRanges', 'GenomicRanges','Rsamtools', 'GenomeInfoDb'))
 ```
 
 ## Installation
