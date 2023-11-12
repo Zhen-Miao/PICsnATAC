@@ -14,5 +14,5 @@ jobs:
           target_repo_url:
             git@github.com:Zhen-Miao/PIC-snATAC.git
           ssh_private_key:                              # <-- use 'secrets' to pass credential information.
-            ${{ secrets.GITHUB_SSH_PRIVATE_KEY }}
+            ${{ secrets.DEPLOY_KEY }}
 
