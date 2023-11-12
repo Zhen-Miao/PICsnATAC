@@ -1,0 +1,19 @@
+name: Mirror to PIC-snATAC
+
+on:
+  push:
+    branches:
+      - main  # or your default branch
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mirror Repository
+        uses: wearerequired/git-mirror-action@v1
+        with:
+          source-repo: "Zhen-Miao/PICsnATAC"
+          destination-repo: "Zhen-Miao/PIC-snATAC"
+          user-email: "zhenmiaonk@gmail.com"
+          user-name: "Zhen-Miao"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
