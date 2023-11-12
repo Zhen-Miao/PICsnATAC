@@ -1,6 +1,6 @@
 Package: PICsnATAC
 Title: PICsnATAC
-Version: 0.3.0
+Version: 0.3.1
 Authors@R: 
     person("Zhen", "Miao", , "zhenmiao@pennmedicine.upenn.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3255-9517"))
