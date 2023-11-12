@@ -86,14 +86,14 @@ count_peaks <- function(peak_sets, filtered_fragments,
 }
 
 
-#' generate a sparse matrix from a list of sparse vectors
+#' Generate a sparse matrix from a list of sparse vectors
 #'
 #' @param chunk A chunk of lists with each element being a sparseVector
 #'
 #' @return A sparseMatrix that is a column bind of all sparseVectors within
 #'  the chunk
 #' @noRd
-make_s_matrix_from_s_vector <- function(chunk) {
+make_s_mat_from_s_vec <- function(chunk) {
   indices <- lapply(chunk, function(y) y@i)
   values <- lapply(chunk, function(y) y@x)
 
@@ -129,10 +129,10 @@ list_to_sparseMatrix <- function(list_s_vetors, n_features) {
       list_s_vetors,
       ceiling(seq_along(list_s_vetors) / chunk_size)
     )
-    sparse_matrices <- lapply(chunks, make_s_matrix_from_s_vector)
+    sparse_matrices <- lapply(chunks, make_s_mat_from_s_vec)
     sparse_matrices <- do.call(cbind, sparse_matrices)
   } else {
-    sparse_matrices <- make_s_matrix_from_s_vector(list_s_vetors)
+    sparse_matrices <- make_s_mat_from_s_vec(list_s_vetors)
   }
   return(sparse_matrices)
 }
@@ -247,9 +247,8 @@ PIC_counting <- function(cells,
 
     ## require the end to be larger than start -- this is useful for
     ## s3-ATAC-seq data if end smaller than start
-    f1_sub1 <- f1[f1$start - 1 < f1$end, ]
-
     if (sum(f1$start - 1 >= f1$end) >= 1) {
+      f1_sub1 <- f1[f1$start - 1 < f1$end, ]
       f1_sub2 <- f1[f1$start - 1 >= f1$end, ]
       f1_sub2s <- f1_sub2$start
       f1_sub2$start <- f1_sub2$end
@@ -257,8 +256,9 @@ PIC_counting <- function(cells,
       f1 <- rbind(f1_sub1, f1_sub2)
       rm(f1_sub2)
       rm(f1_sub2s)
+      rm(f1_sub1)
     }
-    rm(f1_sub1)
+
 
     ## generate GenomicRanges object
     f1 <- GenomicRanges::makeGRangesFromDataFrame(f1,
@@ -277,7 +277,14 @@ PIC_counting <- function(cells,
     for (i in 1:n_subset) {
       s <- (i - 1) * 500 + 1
       e <- min(i * 500, n_cells)
-      f1k[[i]] <- f1_s[f1_s$cell_barcode %in% cells[s:e], ]
+
+      ## deduplicate f1_s
+      if (deduplicate) {
+        f1k[[i]] <- unique(f1_s[f1_s$cell_barcode %in% cells[s:e], ])
+      }else{
+        f1k[[i]] <- f1_s[f1_s$cell_barcode %in% cells[s:e], ]
+      }
+
     }
     rm(f1_s)
     gc()
@@ -292,18 +299,9 @@ PIC_counting <- function(cells,
     ## counting
     for (i in 1:n_cells) {
       ii <- cells[i]
-      if (i %% 500 == 0) {
-        jj <- i %/% 500
-      } else {
-        jj <- (i %/% 500) + 1
-      }
+      jj <- ceiling(i / 500)
 
       f1_sub <- f1k[[jj]][f1k[[jj]]$cell_barcode == ii, ]
-
-      ## deduplicate f1_sub
-      if (deduplicate) {
-        f1_sub <- unique(f1_sub)
-      }
 
       ## count peaks
       out_summ[[ii]] <- count_peaks(
