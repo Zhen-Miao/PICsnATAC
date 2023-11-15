@@ -74,7 +74,7 @@ This is a basic example which shows you how to construct PIC-based cell
 by peak matrix:
 
 ``` r
-library("PICsnATAC")
+library(PICsnATAC)
 
 pic_matrix <- PIC_counting(cells, fragment_tsv_gz_file_location, peak_sets)
 ```
@@ -105,3 +105,11 @@ data.](https://htmlpreview.github.io/?https://github.com/Zhen-Miao/PICsnATAC/blo
 
 vignette 5: [DAR test with PIC parametric test
 framework.](https://htmlpreview.github.io/?https://github.com/Zhen-Miao/PICsnATAC/blob/main/vignettes/vignette-5----DAR-analysis-with-PIC-parametric-framework.html)
+
+## Citation
+
+If you use PICsnATAC in your research, please cite our paper:
+
+Miao Z and Kim J. **Uniform quantification of single-nucleus ATAC-seq
+data with Paired- Insertion Counting (PIC) and a model-based insertion
+rate estimator.** *Nature Methods* 2023 (In press)

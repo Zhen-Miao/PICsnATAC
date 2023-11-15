@@ -76,7 +76,7 @@ Note if you have multiple matrices, please make sure you save them under differe
 # Reference
 If you used PIC-snATAC counting in your analysis, please cite our manuscript:
 
-Miao Z, Kim J. Is single nucleus ATAC-seq accessibility a qualitative or quantitative measurement?. _bioRxiv_. 2022.
+Miao Z and Kim J. *Uniform quantification of single-nucleus ATAC-seq data with Paired- Insertion Counting (PIC) and a model-based insertion rate estimator.* _Nature Methods_ 2023 (In press)
 
 The dsc-ATAC-seq dataset is associated with the following publication:
 	

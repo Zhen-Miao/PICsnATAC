@@ -30,7 +30,7 @@ Input files for PIC counting includes:
 
 Below are the step-by-step instructions for obtaining these input from 10X Cell Ranger output files. Example datasets can be downloaded from 10X Genomics website [here](https://www.10xgenomics.com/resources/datasets/5-k-peripheral-blood-mononuclear-cells-pbm-cs-from-a-healthy-donor-next-gem-v-1-1-1-1-standard-2-0-0).
 
-# Cell Barcodes
+## Cell Barcodes
 If we want to keep the cells from Cell Ranger filtering scheme:
 ```{r eval=FALSE}
 meta.data <- read.csv("atac_pbmc_5k_nextgem_singlecell.csv", header = TRUE)
@@ -39,7 +39,7 @@ meta.data_filtered <- meta.data[meta.data$is__cell_barcode == 1, ]
 cells <- meta.data_filtered$barcode
 ```
 
-# Peak set
+## Peak set
 If we want to keep the set of peaks from Cell Ranger:
 ```{r eval=FALSE}
 peaks <- data.table::fread("atac_pbmc_5k_nextgem_peaks.bed", header = FALSE)
@@ -64,5 +64,5 @@ Note if you have multiple matrices, please make sure you save them as different 
 # Reference
 If you used PIC-snATAC counting in your analysis, please cite our manuscript as:
 
-Miao Z, Kim J. Is single nucleus ATAC-seq accessibility a qualitative or quantitative measurement?. _bioRxiv_. 2022.
+Miao Z and Kim J. *Uniform quantification of single-nucleus ATAC-seq data with Paired- Insertion Counting (PIC) and a model-based insertion rate estimator.* _Nature Methods_ 2023 (In press)
 
