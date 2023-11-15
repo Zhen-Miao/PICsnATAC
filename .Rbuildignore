@@ -6,3 +6,6 @@
 ^analysis_codes
 ^README\.Rmd$
 ^vignettes
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

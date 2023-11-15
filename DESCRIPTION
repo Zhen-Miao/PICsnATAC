@@ -5,6 +5,7 @@ Authors@R:
     person("Zhen", "Miao", , "zhenmiao@pennmedicine.upenn.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-3255-9517"))
 Description: A package for Paired Insertion Counting for snATAC-seq data.
+biocViews: 
 Imports: 
     IRanges,
     GenomicRanges,

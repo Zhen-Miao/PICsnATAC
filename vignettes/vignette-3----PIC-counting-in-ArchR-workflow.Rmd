@@ -8,10 +8,10 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = "/Users/Shared/Example_dataset1/")
 ```
 
-### content 
+# content 
 This Vignette contains an example to use PIC counting in ArchR workflow. 
 
-### required libraries 
+# required libraries 
 Please make sure the following libraries are installed and loaded for the analysis. 
 ```{r eval=FALSE}
 library("data.table")
@@ -21,13 +21,13 @@ library("PICsnATAC")
 library("ArchR")
 ```
 
-### Input files
+# Input files
 
 Below are the step-by-step instructions for obtaining these input. Here we used the ArchR tutorial dataset to illustrate how to add PIC counting output to ArchR analysis. Please also refer to [ArchR Vignettes](https://www.archrproject.com/articles/Articles/tutorial.html) for additional information of ArchR workflow 
 
 Please make sure to download the tutorial dataset by running `getTutorialData()` function:
 
-### Load Example Dataset and Creating Arrow Files
+# Load Example Dataset and Creating Arrow Files
 Here we used ArchR example dataset as 
 ```{r eval=FALSE}
 inputFiles <- getTutorialData("Hematopoiesis")
@@ -43,7 +43,7 @@ ArrowFiles <- createArrowFiles(
 )
 ```
 
-### Inferring doublet
+# Inferring doublet
 We have this section as ArchR tutorial recommended. But this is option and please make sure you understand the process of doublet inferrence before executing this part
 
 ```{r eval=FALSE}
@@ -55,7 +55,7 @@ doubScores <- addDoubletScores(
 )
 ```
 
-### Create an ArchRproject
+# Create an ArchRproject
 ```{r eval=FALSE}
 proj <- ArchRProject(
   ArrowFiles = ArrowFiles,
@@ -65,7 +65,7 @@ proj <- ArchRProject(
 )
 ```
 
-### Peak calling with MACS2
+# Peak calling with MACS2
 Please make sure MACS2 is installed before running this. ArchR also supports 
 other peak calling methods, please refer to ArchR manual for additional options. 
 ```{r eval=FALSE}
@@ -76,7 +76,7 @@ proj <- addReproduciblePeakSet(
 )
 ```
 
-### Obtain PIC matrix from ArchRproject input
+# Obtain PIC matrix from ArchRproject input
 Here, we have three samples, we compute the PIC matrix for each of them separately. 
 ```{r eval=FALSE}
 pic_mat <- rep(list(), length = length(inputFiles))
@@ -109,7 +109,7 @@ for (s in seq_along(inputFiles)) {
 # pic_mat_comb <- pic_mat_comb[,rownames(getCellColData(proj))]
 ```
 
-### Add PIC matrix to ArchRproject object 
+# Add PIC matrix to ArchRproject object 
 Here we iteratively add PIC matrix to the ArchR object
 ```{r eval=FALSE}
 for (s in seq_along(inputFiles)) {
@@ -123,7 +123,7 @@ for (s in seq_along(inputFiles)) {
 ```
 
 
-### Save and load ArchRProject
+# Save and load ArchRProject
 
 ```{r eval=FALSE}
 ## to save object
@@ -134,7 +134,7 @@ proj <- loadArchRProject(path = "HemeTutorial")
 ```
 
 
-### Reference
+# Reference
 If you used PIC-snATAC counting in your analysis, please cite our manuscript:
 
 Miao Z, Kim J. Is single nucleus ATAC-seq accessibility a qualitative or quantitative measurement?. _bioRxiv_. 2022.
