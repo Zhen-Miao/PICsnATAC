@@ -32,7 +32,7 @@ jobs:
           use-public-rspm: true
 
       - name: Install some packages from CRAN
-        run: Rscript -e 'install.packages(c("BiocManager", "pkgdown", "parallel", "tidyr", "data.table"))'
+        run: Rscript -e 'install.packages(c("BiocManager", "pkgdown", "parallel", "tidyr", "data.table", "devtools"))'
 
       - name: Install some packages from bioconductor
         run: Rscript -e 'BiocManager::install(c("S4Vectors", "GenomicRanges","GenomeInfoDb","Rsamtools"))'
@@ -42,7 +42,7 @@ jobs:
 
       # - uses: r-lib/actions/setup-r-dependencies@v2
       #   with:
-      #     extra-packages: any::pkgdown, local::.
+      #     extra-packages: any::pkgdown
       #     needs: website
 
       - name: Build site
