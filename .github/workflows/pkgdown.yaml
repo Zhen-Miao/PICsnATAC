@@ -34,7 +34,7 @@ jobs:
         run: Rscript -e 'install.packages("BiocManager")'
 
       - name: Install some packages
-        run: Rscript -e 'BiocManager::install("S4Vectors", version = 0.40.1)'
+        run: Rscript -e 'BiocManager::install("S4Vectors", version = "0.40.1")'
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
