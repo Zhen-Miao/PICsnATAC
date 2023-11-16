@@ -31,6 +31,9 @@ jobs:
           r-version: '4.2.3'
           use-public-rspm: true
 
+      - name: Install cURL Headers
+        run: sudo apt-get install libcurl4-openssl-dev
+
       - name: Install some packages from CRAN
         run: Rscript -e 'install.packages(c("BiocManager", "pkgdown", "parallel", "tidyr", "data.table", "devtools", "RCurl"))'
 
