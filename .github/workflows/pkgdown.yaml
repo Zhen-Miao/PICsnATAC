@@ -32,15 +32,15 @@ jobs:
           use-public-rspm: true
 
       - name: Install some packages
-        run: Rscript -e 'install.packages("BiocManager")'
+        run: Rscript -e 'install.packages(c("BiocManager", "pkgdown", "parallel","tidyr",data.table))'
 
       - name: Install some packages
-        run: Rscript -e 'BiocManager::install("S4Vectors")'
+        run: Rscript -e 'BiocManager::install(c("S4Vectors", "GenomicRanges","GenomeInfoDb","Rsamtools"))'
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::pkgdown, local::.
-          needs: website
+      # - uses: r-lib/actions/setup-r-dependencies@v2
+      #   with:
+      #     extra-packages: any::pkgdown, local::.
+      #     needs: website
 
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
