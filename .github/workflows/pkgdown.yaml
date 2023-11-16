@@ -35,7 +35,7 @@ jobs:
         run: Rscript -e 'install.packages(c("BiocManager", "pkgdown", "parallel", "tidyr", "data.table", "devtools", "RCurl"))'
 
       - name: Install some packages from bioconductor
-        run: Rscript -e 'BiocManager::install(c("S4Vectors", "GenomicRanges","GenomeInfoDb","Rsamtools"))'
+        run: Rscript -e 'BiocManager::install(c("S4Vectors", "GenomicRanges","GenomeInfoDb", "Rhtslib", "Rsamtools"))'
 
       - name: Install some packages from github
         run: Rscript -e 'devtools::install_github(c("Zhen-Miao/PICsnATAC"))'
