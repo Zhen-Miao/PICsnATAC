@@ -30,10 +30,7 @@ jobs:
         with:
           use-public-rspm: true
 
-      - name: Install required packages
-        run: |
-          install.packages("BiocManager")
-          BiocManager::install("S4Vectors", version = "0.40.1")
+      - uses: r-lib/actions/setup-renv@v2
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
