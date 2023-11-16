@@ -8,18 +8,17 @@ Description: A package for Paired Insertion Counting for snATAC-seq data.
 Depends: 
     R (>= 3.4.0)
 Imports: 
-    IRanges,
-    GenomicRanges,
     methods,
     Matrix,
     data.table,
-    Rsamtools,
-    GenomeInfoDb,
     parallel,
     utils,
+    GenomeInfoDb,
+    IRanges,
+    GenomicRanges,
+    Rsamtools,
     tidyr,
     progress
-Remotes: Bioconductor/S4Vectors
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

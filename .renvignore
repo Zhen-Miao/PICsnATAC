@@ -1,0 +1,7 @@
+^analysis_codes
+analysis_codes/
+docs/
+man/
+*.Rmd
+tests/
+vignettes/
