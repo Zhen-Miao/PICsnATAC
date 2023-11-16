@@ -32,7 +32,7 @@ jobs:
           use-public-rspm: true
 
       - name: Install some packages from CRAN
-        run: Rscript -e 'install.packages(c("BiocManager", "pkgdown", "parallel", "tidyr", "data.table", "devtools"))'
+        run: Rscript -e 'install.packages(c("BiocManager", "pkgdown", "parallel", "tidyr", "data.table", "devtools", "RCurl"))'
 
       - name: Install some packages from bioconductor
         run: Rscript -e 'BiocManager::install(c("S4Vectors", "GenomicRanges","GenomeInfoDb","Rsamtools"))'
