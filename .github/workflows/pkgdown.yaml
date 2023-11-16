@@ -31,11 +31,14 @@ jobs:
           r-version: '4.2.3'
           use-public-rspm: true
 
-      - name: Install some packages
+      - name: Install some packages from CRAN
         run: Rscript -e 'install.packages(c("BiocManager", "pkgdown", "parallel", "tidyr", "data.table"))'
 
-      - name: Install some packages
+      - name: Install some packages from bioconductor
         run: Rscript -e 'BiocManager::install(c("S4Vectors", "GenomicRanges","GenomeInfoDb","Rsamtools"))'
+
+      - name: Install some packages from github
+        run: Rscript -e 'devtools::install_github(c("Zhen-Miao/PICsnATAC"))'
 
       # - uses: r-lib/actions/setup-r-dependencies@v2
       #   with:
