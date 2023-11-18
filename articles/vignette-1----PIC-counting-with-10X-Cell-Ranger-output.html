@@ -77,8 +77,8 @@
 <div class="section level2">
 <h2 id="content">content<a class="anchor" aria-label="anchor" href="#content"></a>
 </h2>
-<p>This Vignette contains an example to use PIC counting on 10X Cell
-Ranger output.</p>
+<p>This Vignette contains an example to use PIC counting to construct a
+Peak-by-Cell matrix on 10X Cell Ranger output.</p>
 </div>
 <div class="section level2">
 <h2 id="required-libraries">required libraries<a class="anchor" aria-label="anchor" href="#required-libraries"></a>
@@ -94,7 +94,7 @@ the analysis.</p>
 <div class="section level2">
 <h2 id="input-files">Input files<a class="anchor" aria-label="anchor" href="#input-files"></a>
 </h2>
-<p>Input files for PIC counting includes:</p>
+<p>The following files are required input for PIC counting:</p>
 <ul>
 <li>cell barcodes with metadata (<code>singlecell.csv</code>)</li>
 <li>list of peak regions (<code>peaks.bed</code>)</li>
@@ -109,9 +109,12 @@ from 10X Genomics website <a href="https://www.10xgenomics.com/resources/dataset
 <p>If we want to keep the cells from Cell Ranger filtering scheme:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">meta.data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"atac_pbmc_5k_nextgem_singlecell.csv"</span>, header <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co"># -- in your own Cell Ranger output, the file name will be 'singlecell.csv'</span></span>
+<span><span class="co"># -- Note, in your own Cell Ranger output, the file name will be 'singlecell.csv'</span></span>
 <span><span class="va">meta.data_filtered</span> <span class="op">&lt;-</span> <span class="va">meta.data</span><span class="op">[</span><span class="va">meta.data</span><span class="op">$</span><span class="va">is__cell_barcode</span> <span class="op">==</span> <span class="fl">1</span>, <span class="op">]</span></span>
 <span><span class="va">cells</span> <span class="op">&lt;-</span> <span class="va">meta.data_filtered</span><span class="op">$</span><span class="va">barcode</span></span></code></pre></div>
+<p>Alternatively, we can use the <code>'singlecell.csv'</code> file to
+conduct customized filtering based on the total number of reads and TSS
+enrichment, etc.</p>
 </div>
 <div class="section level3">
 <h3 id="peak-set">Peak set<a class="anchor" aria-label="anchor" href="#peak-set"></a>
@@ -122,13 +125,19 @@ from 10X Genomics website <a href="https://www.10xgenomics.com/resources/dataset
 <span><span class="co"># -- in your own Cell Ranger output, the file name will be 'peaks.bed'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">peaks</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"seqname"</span>, <span class="st">"start"</span>, <span class="st">"end"</span><span class="op">)</span></span>
 <span><span class="va">peak_sets</span> <span class="op">&lt;-</span> <span class="fu">GenomicRanges</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/makeGRangesFromDataFrame.html" class="external-link">makeGRangesFromDataFrame</a></span><span class="op">(</span><span class="va">peaks</span><span class="op">)</span></span></code></pre></div>
-<p>Note, the codes will be the same for MACS2 called peaks, just change
-the file name</p>
+<p>Note that Cell Ranger tend to output wider peaks and the peak set is
+not cell-type specific, so <code>MACS2</code> is often used to call
+peaks for each cell type separately before combining into one union set
+of peaks. To use MACS2-called peaks, just change the file name
+accordingly.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="run-pic-and-save-output">Run PIC and save output<a class="anchor" aria-label="anchor" href="#run-pic-and-save-output"></a>
 </h2>
+<div class="section level3">
+<h3 id="load-the-whole-file-memory-heavy">Load the whole file (memory heavy)<a class="anchor" aria-label="anchor" href="#load-the-whole-file-memory-heavy"></a>
+</h3>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fragment_tsv_gz_file_location</span> <span class="op">&lt;-</span> <span class="st">"atac_pbmc_5k_nextgem_fragments.tsv.gz"</span></span>
 <span><span class="va">pic_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/PIC_counting.html">PIC_counting</a></span><span class="op">(</span></span>
@@ -138,16 +147,34 @@ the file name</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">pic_mat</span>, <span class="st">"PIC_mat.rds"</span><span class="op">)</span></span></code></pre></div>
 <p>Note if you have multiple matrices, please make sure you save them as
-different files</p>
+different files.</p>
+</div>
+<div class="section level3">
+<h3 id="load-the-file-dynamically-via-rsamtools">Load the file dynamically via Rsamtools<a class="anchor" aria-label="anchor" href="#load-the-file-dynamically-via-rsamtools"></a>
+</h3>
+<p>Alternatively, for very large fragment files, we may want to load it
+dynamically. This is simple with PIC_counting, we just need to specify
+<code>load_full = FALSE</code> and PIC_counting will load the file for
+each chromosome separately.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fragment_tsv_gz_file_location</span> <span class="op">&lt;-</span> <span class="st">"atac_pbmc_5k_nextgem_fragments.tsv.gz"</span></span>
+<span><span class="va">pic_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/PIC_counting.html">PIC_counting</a></span><span class="op">(</span></span>
+<span>  cells <span class="op">=</span> <span class="va">cells</span>,</span>
+<span>  fragment_tsv_gz_file_location <span class="op">=</span> <span class="va">fragment_tsv_gz_file_location</span>,</span>
+<span>  peak_sets <span class="op">=</span> <span class="va">peak_sets</span>,</span>
+<span>  load_full <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">pic_mat</span>, <span class="st">"PIC_mat.rds"</span><span class="op">)</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="reference">Reference<a class="anchor" aria-label="anchor" href="#reference"></a>
 </h2>
 <p>If you used PIC-snATAC counting in your analysis, please cite our
 manuscript as:</p>
-<p>Miao Z and Kim J. <em>Uniform quantification of single-nucleus
+<p>Miao Z and Kim J. <strong>Uniform quantification of single-nucleus
 ATAC-seq data with Paired- Insertion Counting (PIC) and a model-based
-insertion rate estimator.</em> <em>Nature Methods</em> 2023 (In
+insertion rate estimator.</strong> <em>Nature Methods</em> 2023 (In
 press)</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -158,7 +185,7 @@ press)</p>
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Zhen Miao.</p>
+<p>Developed by Zhen Miao, Junhyong Kim.</p>
 </div>
 
 <div class="pkgdown-footer-right">
