@@ -1,0 +1,14 @@
+citHeader("To cite PICsnATAC in publications, please use:")
+
+
+bibentry(
+  bibtype  = "Article",
+  title    = "Uniform quantification of single-nucleus ATAC-seq data with Paired- Insertion Counting (PIC) and a model-based insertion rate estimator",
+  author   = "Miao, Zhen and Kim, Junhyong",
+  journal  = "Nature Methods",
+  year     = "2023",
+  volume   = "in press",
+  number   = "",
+  pages    = "",
+  doi      = "10.1101/2022.04.20.488960"
+)

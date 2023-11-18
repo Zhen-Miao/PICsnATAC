@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # content 
-This Vignette contains an example to use PIC counting on 10X Cell Ranger output. 
+This Vignette contains an example to use PIC counting to construct a Peak-by-Cell matrix on 10X Cell Ranger output. 
 
 # required libraries 
 Please make sure the following libraries are installed and loaded for the analysis. 
@@ -22,7 +22,7 @@ library("PICsnATAC")
 
 # Input files
 
-Input files for PIC counting includes:
+The following files are required input for PIC counting:
 
   * cell barcodes with metadata (`singlecell.csv`)
   * list of peak regions (`peaks.bed`)
@@ -34,10 +34,12 @@ Below are the step-by-step instructions for obtaining these input from 10X Cell 
 If we want to keep the cells from Cell Ranger filtering scheme:
 ```{r eval=FALSE}
 meta.data <- read.csv("atac_pbmc_5k_nextgem_singlecell.csv", header = TRUE)
-# -- in your own Cell Ranger output, the file name will be 'singlecell.csv'
+# -- Note, in your own Cell Ranger output, the file name will be 'singlecell.csv'
 meta.data_filtered <- meta.data[meta.data$is__cell_barcode == 1, ]
 cells <- meta.data_filtered$barcode
 ```
+
+Alternatively, we can use the `'singlecell.csv'` file to conduct customized filtering based on the total number of reads and TSS enrichment, etc.
 
 ## Peak set
 If we want to keep the set of peaks from Cell Ranger:
@@ -47,9 +49,10 @@ peaks <- data.table::fread("atac_pbmc_5k_nextgem_peaks.bed", header = FALSE)
 colnames(peaks) <- c("seqname", "start", "end")
 peak_sets <- GenomicRanges::makeGRangesFromDataFrame(peaks)
 ```
-Note, the codes will be the same for MACS2 called peaks, just change the file name
+Note that Cell Ranger tend to output wider peaks and the peak set is not cell-type specific, so `MACS2` is often used to call peaks for each cell type separately before combining into one union set of peaks. To use MACS2-called peaks, just change the file name accordingly. 
 
 # Run PIC and save output
+## Load the whole file (memory heavy)
 ```{r eval=FALSE}
 fragment_tsv_gz_file_location <- "atac_pbmc_5k_nextgem_fragments.tsv.gz"
 pic_mat <- PIC_counting(
@@ -59,10 +62,23 @@ pic_mat <- PIC_counting(
 )
 saveRDS(pic_mat, "PIC_mat.rds")
 ```
-Note if you have multiple matrices, please make sure you save them as different files 
+Note if you have multiple matrices, please make sure you save them as different files. 
+
+## Load the file dynamically via Rsamtools
+Alternatively, for very large fragment files, we may want to load it dynamically. This is simple with PIC_counting, we just need to specify `load_full = FALSE` and PIC_counting will load the file for each chromosome separately. 
+```{r eval=FALSE}
+fragment_tsv_gz_file_location <- "atac_pbmc_5k_nextgem_fragments.tsv.gz"
+pic_mat <- PIC_counting(
+  cells = cells,
+  fragment_tsv_gz_file_location = fragment_tsv_gz_file_location,
+  peak_sets = peak_sets,
+  load_full = FALSE
+)
+saveRDS(pic_mat, "PIC_mat.rds")
+```
 
 # Reference
 If you used PIC-snATAC counting in your analysis, please cite our manuscript as:
 
-Miao Z and Kim J. *Uniform quantification of single-nucleus ATAC-seq data with Paired- Insertion Counting (PIC) and a model-based insertion rate estimator.* _Nature Methods_ 2023 (In press)
+Miao Z and Kim J. **Uniform quantification of single-nucleus ATAC-seq data with Paired- Insertion Counting (PIC) and a model-based insertion rate estimator.** _Nature Methods_ 2023 (In press)
 

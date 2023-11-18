@@ -1,9 +1,14 @@
 Package: PICsnATAC
-Title: PICsnATAC
+Title: PICsnATAC: Paired Insertion Counting for snATAC-seq data
 Version: 0.3.1
-Authors@R: 
-    person("Zhen", "Miao", , "zhenmiao@pennmedicine.upenn.edu", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0002-3255-9517"))
+Authors@R: c(
+           person("Zhen", "Miao", , "zhenmiao@pennmedicine.upenn.edu",
+             role = c("aut", "cre"),
+             comment = c(ORCID = "0000-0002-3255-9517")
+             ),
+           person("Junhyong", "Kim",, role = c("aut"), 
+             comment = c(ORCID = "0000-0002-7726-8246")
+             ))
 Description: A package for Paired Insertion Counting for snATAC-seq data.
 Depends: 
     R (>= 3.4.0)
