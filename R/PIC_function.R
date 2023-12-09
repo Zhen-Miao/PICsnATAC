@@ -108,6 +108,9 @@ make_s_mat_from_s_vec <- function(chunk) {
     i = i, j = j, x = x,
     dims = c(length(chunk[[1]]), length(chunk))
   )
+
+  ## add cell names to the matrix
+  colnames(s_mat) <- names(chunk)
   return(s_mat)
 }
 

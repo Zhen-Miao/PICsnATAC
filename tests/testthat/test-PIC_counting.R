@@ -23,4 +23,5 @@ test_that("data.table is loadable", {
 
   expect_equal(pic_mat@i, c(8, 8, 3, 1, 4, 6, 3, 7, 8, 4))
   expect_equal(pic_mat@x, c(1, 3, 1, 1, 1, 1, 1, 1, 1, 1))
+  expect_equal(colnames(pic_mat), cells)
 })
