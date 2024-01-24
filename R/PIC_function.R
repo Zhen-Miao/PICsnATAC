@@ -223,16 +223,16 @@ PIC_counting <- function(cells,
     stop("extend_size has to be a positive integer!")
   }
 
+  ## we accept peak_sets to be a GRanges or we convert it into one
+  if (!methods::is(peak_sets, "GRanges")) {
+    peak_sets <- data_frame_to_GRanges(peak_sets)
+  }
+
   n_cells <- length(cells)
   n_features <- length(peak_sets)
 
   if (n_cells == 0 | anyNA(cells)) {
     stop("cell names are empty or contain NA values!")
-  }
-
-  ## we accpt peak_sets to be a GRanges or we convert it into one
-  if (!methods::is(peak_sets, "GRanges")) {
-    peak_sets <- data_frame_to_GRanges(peak_sets)
   }
 
   ## if load full files
