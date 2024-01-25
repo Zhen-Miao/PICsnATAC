@@ -124,7 +124,7 @@ make_s_mat_from_s_vec <- function(chunk) {
 #' @return A sparseMatrix that is a column bind of all sparseVectors
 #' @noRd
 list_to_sparseMatrix <- function(list_s_vetors, n_features) {
-  n_cells <- length(list_s_vetors)
+  n_cells <- as.numeric(length(list_s_vetors))
   chunk_size <- ceiling(n_cells * n_features / 2^31)
 
   if (chunk_size > 1) {
