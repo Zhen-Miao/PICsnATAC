@@ -32,7 +32,7 @@ load_fragments <- function(
   ## report the proportion of reads in cell barcodes
   prop_bcreads <- n_cells_fragment_file / dim(f1)[1]
   if (verbose) {
-    print(paste("proportion of reads in cell barcdes is ", prop_bcreads,
+    print(paste("proportion of reads in cell barcodes is ", prop_bcreads,
       sep = ""
     ))
   }
