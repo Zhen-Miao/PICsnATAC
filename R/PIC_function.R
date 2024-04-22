@@ -1,7 +1,6 @@
 ## PIC function
 
 
-
 #' Function for loading fragment files and filter by cell barcodes
 #'
 #' @param fragment_tsv_gz_file_location The 10X Cell Ranger output
@@ -32,9 +31,7 @@ load_fragments <- function(
   ## report the proportion of reads in cell barcodes
   prop_bcreads <- n_cells_fragment_file / dim(f1)[1]
   if (verbose) {
-    print(paste("proportion of reads in cell barcodes is ", prop_bcreads,
-      sep = ""
-    ))
+    cat(sprintf("proportion of reads in cell barcodes is %.2f\n", prop_bcreads))
   }
 
   ## error when no cells found in the fragment file
@@ -295,9 +292,15 @@ PIC_counting <- function(cells,
     ## progress bar
     pb <- progress::progress_bar$new(
       total = n_cells,
-      format = "computing peak vector for each cell",
-      clear = FALSE
+      format = "[:bar] :percent finished, elapsed: :elapsed",
+      clear = FALSE,
+      width = 60
     )
+
+    if(verbose){
+      cat("Computing peak vector for each cell\n")
+    }
+
 
     ## counting
     for (i in 1:n_cells) {
@@ -317,6 +320,12 @@ PIC_counting <- function(cells,
       pb$tick()
     }
 
+    if(verbose){
+      cat("Summarizing cell-by-peak matrix\n")
+    }else{
+      cat('\n')
+    }
+
     ## convert to a sparse matrix
     out_mat <- list_to_sparseMatrix(
       list_s_vetors = out_summ,
@@ -328,8 +337,14 @@ PIC_counting <- function(cells,
     fname <- paste(pkdf$seqnames, ":", pkdf$start, "-", pkdf$end, sep = "")
     rownames(out_mat) <- fname
   } else {
+
+
     ## use Rsamtools to load data
     tbx <- Rsamtools::TabixFile(fragment_tsv_gz_file_location)
+    ## print job status
+    if(verbose){
+      cat("Data loaded by chromosome\n")
+    }
 
     ## get ranges for each chromosome
     slevels <- seqlevels(peak_sets)
@@ -352,14 +367,14 @@ PIC_counting <- function(cells,
     out_mat_seq <- rep(list(), length = length(slevels))
     names(out_mat_seq) <- slevels
 
-    ## print job status
-    print("loading data for each chromosome")
+    cat("Computing peak vector for each cell\n")
 
     ## progress bar
     pb <- progress::progress_bar$new(
       total = length(slevels),
-      format = "computing peak vector for each chromosome",
-      clear = FALSE
+      format = "[:bar] :percent computed, elapsed: :elapsed",
+      clear = FALSE,
+      width = 60
     )
 
     ## load data for each chromosome
@@ -403,6 +418,11 @@ PIC_counting <- function(cells,
           extend_size = extend_size,
           n_features = n_features
         )
+      }
+      if(verbose){
+        cat("Summarizing cell-by-peak matrix\n")
+      }else{
+        cat('\n')
       }
 
       ## convert to a sparse matrix
