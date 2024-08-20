@@ -1,5 +1,5 @@
 pandoc: 3.1.11
-pkgdown: 2.0.9
+pkgdown: 2.1.0
 pkgdown_sha: ~
 articles:
   vignette-1----PIC-counting-with-10X-Cell-Ranger-output: vignette-1----PIC-counting-with-10X-Cell-Ranger-output.html
@@ -7,8 +7,7 @@ articles:
   vignette-3----PIC-counting-in-ArchR-workflow: vignette-3----PIC-counting-in-ArchR-workflow.html
   vignette-4----PIC-counting-with-dsc-ATAC-seq-data: vignette-4----PIC-counting-with-dsc-ATAC-seq-data.html
   vignette-5----DAR-analysis-with-PIC-parametric-framework: vignette-5----DAR-analysis-with-PIC-parametric-framework.html
-last_built: 2024-04-22T22:07Z
+last_built: 2024-08-20T22:58Z
 urls:
   reference: https://zhen-miao.github.io/PICsnATAC/reference
   article: https://zhen-miao.github.io/PICsnATAC/articles
-
