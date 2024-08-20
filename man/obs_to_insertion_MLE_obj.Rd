@@ -2,7 +2,7 @@
 % Please edit documentation in R/Insertion_rates_and_DAR_test.R
 \name{obs_to_insertion_MLE_obj}
 \alias{obs_to_insertion_MLE_obj}
-\title{Title Calculate the optimal loss from observed PIC counts}
+\title{Calculate the optimal loss from observed PIC counts}
 \usage{
 obs_to_insertion_MLE_obj(pic_mat, capturing_rates, plen, n_cores)
 }
@@ -19,5 +19,5 @@ obs_to_insertion_MLE_obj(pic_mat, capturing_rates, plen, n_cores)
 The optimized loss over insertion rates from 0.01 to 20
 }
 \description{
-Title Calculate the optimal loss from observed PIC counts
+Calculate the optimal loss from observed PIC counts
 }

@@ -1,4 +1,4 @@
-#' Title get theoretical snATAC-seq distribution under condition 1
+#' Get theoretical snATAC-seq distribution under condition 1
 #'
 #' @importFrom stats convolve optimize pchisq
 #' @param insertion_rate The insertion rate (per 1000 base pairs)
@@ -6,7 +6,6 @@
 #'
 #' @return A vector of length 6, representing the probability of observing
 #'  0 to >=5 counts
-#' @export
 #'
 #' @keywords internal
 #' @noRd
@@ -42,7 +41,6 @@
 #' @param peak_lengths A vector containing width of peaks
 #'
 #' @return An insertion-rate by mean count matrix
-#' @export
 #'
 #' @keywords internal
 #' @noRd
@@ -70,7 +68,7 @@
   return(theo_mean_c1)
 }
 
-#' Title get_theoretical_c12
+#' Get theoretical distribution based on condition 1 and 2
 #'
 #' @param insertion_rate A single value of insertion rate
 #' @param peak_length A single vale of peak length, default 1000
@@ -83,7 +81,7 @@
 #' @param max_frag_length maximum fragment length, default 600
 #' @param cap_insertion number of insertions capped at this value, default 20
 #'
-#' return A vector of probability corresponding to different number of fragments
+#' @return A vector of probability corresponding to different number of fragments
 #' @noRd
 #'
 .get_theoretical_c12 <- function(
@@ -167,7 +165,7 @@
 #'
 #' @return A insertion rate by peak length matrix, and each
 #' element of the matrix corresponds to the number of expected fragments
-#' #' @noRd
+#' @noRd
 .insertion_to_c12 <- function(
     insertion_rates = (1:2000) * 0.01,
     peak_lengths = 4:20 * 50,
@@ -206,7 +204,7 @@
 
 
 
-#' Title Compute log loss for a given estimated insertion rate
+#' Compute log loss for a given estimated insertion rate
 #'
 #' @param est_inser Estimated insertion rate (per 1000 base pairs)
 #' @param peak_length The width of peak
@@ -215,7 +213,6 @@
 #' @param obs_pic_vec A vector specifying observed fragment (PIC) counts
 #'
 #' @return Log loss value
-#' @export
 #'
 #' @keywords internal
 #' @noRd
@@ -263,7 +260,7 @@
 }
 
 
-#' Title Calculate the optimal loss from observed PIC counts
+#' Calculate the optimal loss from observed PIC counts
 #'
 #' @import parallel
 #' @param pic_mat The observed peak by cell PIC count matrix
@@ -299,7 +296,7 @@ obs_to_insertion_MLE_obj <- function(pic_mat,
 }
 
 
-#' Title Moment estimator for insertion rates from observed values
+#' Moment estimator for insertion rates from observed values
 #'
 #' @param pic_mat The observed peak by cell PIC count matrix
 #' @param capturing_rates A vector of estimated capturing rates for each cell
@@ -314,7 +311,6 @@ obs_to_insertion_MLE_obj <- function(pic_mat,
 #' @param max_frag_length The value for the s2 hyperparameter in the ssPoisson
 #'   distribution, this stands for the max fragment length requirement such
 #'   that the fragment can be amplifiable. Default = 600
-
 #'
 #' @return A matrix of estimated insertion rates
 #' @export
@@ -395,7 +391,7 @@ obs_to_insertion_ME <- function(
 }
 
 
-#' Title
+#' Log loss from fragment count
 #'
 #' @param est_inser Estimated insertion rate
 #' @param peak_length A numeric value of peak length
@@ -411,7 +407,6 @@ obs_to_insertion_ME <- function(
 #' @param obs_pic_vec Observed PIC count vector for the peak
 #'
 #' @return Log loss value
-#' @export
 #'
 #' @keywords internal
 #' @noRd
@@ -428,8 +423,6 @@ obs_to_insertion_ME <- function(
   #   stop('input capturing rate should have same length with observed vector')
   # }
   n_cells <- length(obs_pic_vec)
-
-
 
   p_W_s_theo <- .get_theoretical_c12(
     insertion_rate = est_inser,
@@ -464,7 +457,7 @@ obs_to_insertion_ME <- function(
 
 
 
-#' Calculate the insertion rate from observed PIC counts
+#' Calculate insertion rate from observed PIC counts
 #'
 #' @import parallel
 #' @param pic_mat The observed peak by cell PIC count matrix

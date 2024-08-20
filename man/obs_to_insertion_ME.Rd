@@ -2,7 +2,7 @@
 % Please edit documentation in R/Insertion_rates_and_DAR_test.R
 \name{obs_to_insertion_ME}
 \alias{obs_to_insertion_ME}
-\title{Title Moment estimator for insertion rates from observed values}
+\title{Moment estimator for insertion rates from observed values}
 \usage{
 obs_to_insertion_ME(
   pic_mat,
@@ -41,5 +41,5 @@ considered.}
 A matrix of estimated insertion rates
 }
 \description{
-Title Moment estimator for insertion rates from observed values
+Moment estimator for insertion rates from observed values
 }

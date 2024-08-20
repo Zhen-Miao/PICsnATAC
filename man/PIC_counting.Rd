@@ -2,7 +2,7 @@
 % Please edit documentation in R/PIC_function.R
 \name{PIC_counting}
 \alias{PIC_counting}
-\title{Title PIC-counting data matrix}
+\title{Count snATAC-seq data matrix with Paired Insertion Counting (PIC)}
 \usage{
 PIC_counting(
   cells,
@@ -46,5 +46,5 @@ bar}
 The peak by cell PIC count matrix
 }
 \description{
-Title PIC-counting data matrix
+Count snATAC-seq data matrix with Paired Insertion Counting (PIC)
 }

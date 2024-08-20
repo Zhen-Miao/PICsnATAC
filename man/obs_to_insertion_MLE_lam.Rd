@@ -2,7 +2,7 @@
 % Please edit documentation in R/Insertion_rates_and_DAR_test.R
 \name{obs_to_insertion_MLE_lam}
 \alias{obs_to_insertion_MLE_lam}
-\title{Calculate the insertion rate from observed PIC counts}
+\title{Calculate insertion rate from observed PIC counts}
 \usage{
 obs_to_insertion_MLE_lam(pic_mat, capturing_rates, plen, n_cores)
 }
@@ -20,5 +20,5 @@ The optimized insertion rate (per 1000 base pairs) over
 insertion rates from 0.01 to 20
 }
 \description{
-Calculate the insertion rate from observed PIC counts
+Calculate insertion rate from observed PIC counts
 }

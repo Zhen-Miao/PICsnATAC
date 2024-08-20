@@ -168,17 +168,18 @@ data_frame_to_GRanges <- function(peak_sets) {
 
 
 
-#' Title PIC-counting data matrix
+#' Count snATAC-seq data matrix with Paired Insertion Counting (PIC)
 #'
 #' @importFrom methods is
 #' @importFrom data.table fread
-#' @import GenomicRanges
-#' @importFrom GenomeInfoDb seqlevels
-#' @import Rsamtools
+#' @importFrom GenomicRanges makeGRangesFromDataFrame
+#' @importFrom GenomeInfoDb seqlevels seqnames
+#' @importFrom Rsamtools TabixFile scanTabix
 #' @importFrom IRanges subsetByOverlaps
 #' @import Matrix
+#' @importFrom BiocGenerics start end
 #' @importFrom utils read.csv str
-#' @import progress
+#' @importFrom progress progress_bar
 #' @param cells The cell barcode lables as a Character vector
 #' @param fragment_tsv_gz_file_location The 10X Cell Ranger output
 #'  fragment.tsv.gz file location. This can usually be found at the /out
@@ -247,12 +248,12 @@ PIC_counting <- function(cells,
 
     ## require the end to be larger than start -- this is useful for
     ## s3-ATAC-seq data if end smaller than start
-    if (sum(f1$start - 1 >= f1$end) >= 1) {
-      f1_sub1 <- f1[f1$start - 1 < f1$end, ]
-      f1_sub2 <- f1[f1$start - 1 >= f1$end, ]
-      f1_sub2s <- f1_sub2$start
-      f1_sub2$start <- f1_sub2$end
-      f1_sub2$end <- f1_sub2s
+    if (sum(f1$"start" - 1 >= f1$"end") >= 1) {
+      f1_sub1 <- f1[f1$"start" - 1 < f1$"end", ]
+      f1_sub2 <- f1[f1$"start" - 1 >= f1$"end", ]
+      f1_sub2s <- f1_sub2$"start"
+      f1_sub2$"start" <- f1_sub2$"end"
+      f1_sub2$"end" <- f1_sub2s
       f1 <- rbind(f1_sub1, f1_sub2)
       rm(f1_sub2)
       rm(f1_sub2s)
@@ -298,7 +299,7 @@ PIC_counting <- function(cells,
     )
 
     if(verbose){
-      cat("Computing peak vector for each cell\n")
+      cat("Computing peak vector for each cell.\n")
     }
 
 
@@ -334,7 +335,7 @@ PIC_counting <- function(cells,
 
     ## add peak information into rownames of output
     pkdf <- as.data.frame(peak_sets)
-    fname <- paste(pkdf$seqnames, ":", pkdf$start, "-", pkdf$end, sep = "")
+    fname <- paste(pkdf$"seqnames", ":", pkdf$"start", "-", pkdf$"end", sep = "")
     rownames(out_mat) <- fname
   } else {
 
@@ -347,8 +348,8 @@ PIC_counting <- function(cells,
     }
 
     ## get ranges for each chromosome
-    slevels <- seqlevels(peak_sets)
-    grl <- split(peak_sets, seqnames(peak_sets))
+    slevels <- GenomeInfoDb::seqlevels(peak_sets)
+    grl <- split(peak_sets, GenomeInfoDb::seqnames(peak_sets))
     grl <- sort(grl)
     n_features_seq <- sapply(grl, length)
     param <- matrix(nrow = length(slevels), ncol = 3)
@@ -358,8 +359,8 @@ PIC_counting <- function(cells,
     param$seqname <- slevels
 
     for (sl in slevels) {
-      param[sl, "start"] <- min(start(grl[[sl]]))
-      param[sl, "end"] <- max(end(grl[[sl]]))
+      param[sl, "start"] <- min(BiocGenerics::start(grl[[sl]]))
+      param[sl, "end"] <- max(BiocGenerics::end(grl[[sl]]))
     }
     param <- GenomicRanges::makeGRangesFromDataFrame(param)
 
@@ -367,7 +368,7 @@ PIC_counting <- function(cells,
     out_mat_seq <- rep(list(), length = length(slevels))
     names(out_mat_seq) <- slevels
 
-    cat("Computing peak vector for each cell\n")
+    cat("Computing peak vector for each cell.\n")
 
     ## progress bar
     pb <- progress::progress_bar$new(
@@ -432,14 +433,14 @@ PIC_counting <- function(cells,
       )
 
       pkdf <- as.data.frame(grl[[seq_name]])
-      fname <- paste(pkdf$seqnames, ":", pkdf$start, "-", pkdf$end, sep = "")
+      fname <- paste(pkdf$"seqnames", ":", pkdf$"start", "-", pkdf$"end", sep = "")
       rownames(out_mat_seq[[seq_name]]) <- fname
     }
 
     out_mat <- do.call(rbind, out_mat_seq)
     pkdf_full <- as.data.frame(peak_sets)
-    fname_full <- paste(pkdf_full$seqnames, ":", pkdf_full$start,
-      "-", pkdf_full$end,
+    fname_full <- paste(pkdf_full$"seqnames", ":", pkdf_full$"start",
+      "-", pkdf_full$"end",
       sep = ""
     )
     outmat <- outmat[fname_full, ]
