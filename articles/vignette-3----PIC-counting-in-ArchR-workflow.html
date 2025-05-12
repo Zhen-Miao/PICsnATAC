@@ -8,8 +8,8 @@
 <title>Vignette 3 -- PIC counting in ArchR workflow • PICsnATAC</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Vignette 3 -- PIC counting in ArchR workflow">
 </head>
 <body>
@@ -108,7 +108,7 @@ Vignettes</a> for additional information of ArchR workflow</p>
 <span>  sampleNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">inputFiles</span><span class="op">)</span>,</span>
 <span>  minTSS <span class="op">=</span> <span class="fl">4</span>, <span class="co"># Dont set this too high because you can always increase later</span></span>
 <span>  minFrags <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  addTileMat <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  addTileMat <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  addGeneScoreMat <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -138,12 +138,23 @@ inferrence before executing this part</p>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="clustering-with-iterative-lsi">Clustering with iterative LSI<a class="anchor" aria-label="anchor" href="#clustering-with-iterative-lsi"></a>
+</h2>
+<p>By default, ArchR will do peak calling with MACS2 for each cluster,
+so we will need to run the following functions to generate clusters.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu">addIterativeLSI</span><span class="op">(</span>ArchRProj <span class="op">=</span> <span class="va">proj</span>, useMatrix <span class="op">=</span> <span class="st">"TileMatrix"</span>,</span>
+<span>                        name <span class="op">=</span> <span class="st">"IterativeLSI"</span><span class="op">)</span></span>
+<span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu">addClusters</span><span class="op">(</span>input <span class="op">=</span> <span class="va">proj</span>, reducedDims <span class="op">=</span> <span class="st">"IterativeLSI"</span><span class="op">)</span></span>
+<span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu">addGroupCoverages</span><span class="op">(</span><span class="va">proj</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="peak-calling-with-macs2">Peak calling with MACS2<a class="anchor" aria-label="anchor" href="#peak-calling-with-macs2"></a>
 </h2>
 <p>Please make sure MACS2 is installed before running this. ArchR also
 supports other peak calling methods, please refer to ArchR manual for
 additional options.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pathToMacs2</span> <span class="op">&lt;-</span> <span class="fu">findMacs2</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu">addReproduciblePeakSet</span><span class="op">(</span></span>
 <span>  ArchRProj <span class="op">=</span> <span class="va">proj</span>,</span>
@@ -154,8 +165,8 @@ additional options.</p>
 <h2 id="obtain-pic-matrix-from-archrproject-input">Obtain PIC matrix from ArchRproject input<a class="anchor" aria-label="anchor" href="#obtain-pic-matrix-from-archrproject-input"></a>
 </h2>
 <p>Here, we have three samples, we compute the PIC matrix for each of
-them separately.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+them separately. Then, they will be loaded to each of the samples.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pic_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>, length <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">inputFiles</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">s</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">inputFiles</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="co">## select one sample</span></span>
@@ -188,21 +199,74 @@ them separately.</p>
 <div class="section level2">
 <h2 id="add-pic-matrix-to-archrproject-object">Add PIC matrix to ArchRproject object<a class="anchor" aria-label="anchor" href="#add-pic-matrix-to-archrproject-object"></a>
 </h2>
-<p>Here we iteratively add PIC matrix to the ArchR object</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">for</span> <span class="op">(</span><span class="va">s</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">inputFiles</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<p>Here we iteratively add PIC matrix to the ArchR object. We have two
+options. 1. Overwrite the PeakMatrix. This will change the original
+PeakMatrix counts. 2. Create another data slot.</p>
+<p>Below, we provide example codes for each setting. ## Overwrite
+original PeakMatrix</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## first, save the data.frame</span></span>
+<span><span class="va">pks</span> <span class="op">&lt;-</span> <span class="va">proj</span><span class="op">@</span><span class="va">peakSet</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">pks</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
+<span><span class="va">pks</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">pks</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">s</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">inputFiles</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  </span>
+<span>  <span class="fu">ArchR</span><span class="fu">:::</span><span class="fu">.initializeMat</span><span class="op">(</span></span>
+<span>    ArrowFile <span class="op">=</span> <span class="va">ArrowFiles</span><span class="op">[</span><span class="va">s</span><span class="op">]</span>, Group <span class="op">=</span> <span class="st">"PeakMatrix"</span>,</span>
+<span>    Class <span class="op">=</span> <span class="st">"integer"</span>, Units <span class="op">=</span> <span class="st">"counts"</span>,</span>
+<span>    cellNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pic_mat</span><span class="op">[[</span><span class="va">s</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>    featureDF <span class="op">=</span> <span class="va">pks</span>, params <span class="op">=</span> <span class="st">"PeakMatrix"</span>,</span>
+<span>    force <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
 <span>  <span class="fu">ArchR</span><span class="fu">:::</span><span class="fu">.addMatToArrow</span><span class="op">(</span></span>
 <span>    mat <span class="op">=</span> <span class="va">pic_mat</span><span class="op">[[</span><span class="va">s</span><span class="op">]</span><span class="op">]</span>,</span>
 <span>    ArrowFile <span class="op">=</span> <span class="va">ArrowFiles</span><span class="op">[</span><span class="va">s</span><span class="op">]</span>,</span>
-<span>    group <span class="op">=</span> <span class="st">"PIC"</span>,</span>
+<span>    Group <span class="op">=</span> <span class="st">"PeakMatrix/matrix_content"</span>,</span>
+<span>    binarize <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="create-another-data-slot-called-pic">Create another data slot called “PIC”<a class="anchor" aria-label="anchor" href="#create-another-data-slot-called-pic"></a>
+</h3>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## first, save the data.frame</span></span>
+<span><span class="va">pks</span> <span class="op">&lt;-</span> <span class="va">proj</span><span class="op">@</span><span class="va">peakSet</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">pks</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
+<span><span class="va">pks</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">pks</span><span class="op">)</span></span>
+<span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">s</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">inputFiles</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  </span>
+<span>  <span class="fu">ArchR</span><span class="fu">:::</span><span class="fu">.initializeMat</span><span class="op">(</span></span>
+<span>    ArrowFile <span class="op">=</span> <span class="va">ArrowFiles</span><span class="op">[</span><span class="va">s</span><span class="op">]</span>, Group <span class="op">=</span> <span class="st">"PIC"</span>,</span>
+<span>    Class <span class="op">=</span> <span class="st">"integer"</span>, Units <span class="op">=</span> <span class="st">"counts"</span>,</span>
+<span>    cellNames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/row_colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pic_mat</span><span class="op">[[</span><span class="va">s</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>    featureDF <span class="op">=</span> <span class="va">pks</span>, params <span class="op">=</span> <span class="st">"PIC"</span>,</span>
+<span>    force <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu">ArchR</span><span class="fu">:::</span><span class="fu">.addMatToArrow</span><span class="op">(</span></span>
+<span>    mat <span class="op">=</span> <span class="va">pic_mat</span><span class="op">[[</span><span class="va">s</span><span class="op">]</span><span class="op">]</span>,</span>
+<span>    ArrowFile <span class="op">=</span> <span class="va">ArrowFiles</span><span class="op">[</span><span class="va">s</span><span class="op">]</span>,</span>
+<span>    Group <span class="op">=</span> <span class="st">"PIC/matrix_content"</span>,</span>
 <span>    binarize <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
+</div>
+<div class="section level2">
+<h2 id="get-available-matrices">Get available Matrices<a class="anchor" aria-label="anchor" href="#get-available-matrices"></a>
+</h2>
+<p>The function below will display available cell-by-feature matrices
+you have.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">getAvailableMatrices</span><span class="op">(</span><span class="va">proj</span><span class="op">)</span></span></code></pre></div>
+</div>
 <div class="section level2">
 <h2 id="save-and-load-archrproject">Save and load ArchRProject<a class="anchor" aria-label="anchor" href="#save-and-load-archrproject"></a>
 </h2>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## to save object</span></span>
 <span><span class="va">proj</span> <span class="op">&lt;-</span> <span class="fu">saveArchRProject</span><span class="op">(</span>ArchRProj <span class="op">=</span> <span class="va">proj</span><span class="op">)</span></span>
 <span></span>
@@ -214,10 +278,10 @@ them separately.</p>
 </h2>
 <p>If you used PIC-snATAC counting in your analysis, please cite our
 manuscript:</p>
-<p>Miao Z and Kim J. <em>Uniform quantification of single-nucleus
-ATAC-seq data with Paired- Insertion Counting (PIC) and a model-based
-insertion rate estimator.</em> <em>Nature Methods</em> 2023 (In
-press)</p>
+<p>Miao Z, and Kim J. <em>Uniform quantification of single-nucleus
+ATAC-seq data with Paired-Insertion Counting (PIC) and a model-based
+insertion rate estimator.</em> <em>Nature Methods</em> 21.1 (2024):
+32-36.</p>
 <p>ArchR manuscript:</p>
 <p>Granja, Jeffrey M., et al. “ArchR is a scalable software package for
 integrative single-cell chromatin accessibility analysis.” <em>Nature
@@ -234,7 +298,7 @@ genetics</em> 53.3 (2021): 403-411.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
 </div>
 
     </footer>
