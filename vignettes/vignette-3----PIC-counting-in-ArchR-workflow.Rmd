@@ -38,10 +38,11 @@ ArrowFiles <- createArrowFiles(
   sampleNames = names(inputFiles),
   minTSS = 4, # Dont set this too high because you can always increase later
   minFrags = 1000,
-  addTileMat = FALSE,
+  addTileMat = TRUE,
   addGeneScoreMat = FALSE
 )
 ```
+
 
 # Inferring doublet
 We have this section as ArchR tutorial recommended. But this is option and please make sure you understand the process of doublet inferrence before executing this part
@@ -65,6 +66,17 @@ proj <- ArchRProject(
 )
 ```
 
+# Clustering with iterative LSI
+By default, ArchR will do peak calling with MACS2 for each cluster, so we will 
+need to run the following functions to generate clusters. 
+```{r eval=FALSE}
+proj <- addIterativeLSI(ArchRProj = proj, useMatrix = "TileMatrix",
+                        name = "IterativeLSI")
+proj <- addClusters(input = proj, reducedDims = "IterativeLSI")
+proj <- addGroupCoverages(proj)
+```
+
+
 # Peak calling with MACS2
 Please make sure MACS2 is installed before running this. ArchR also supports 
 other peak calling methods, please refer to ArchR manual for additional options. 
@@ -78,6 +90,7 @@ proj <- addReproduciblePeakSet(
 
 # Obtain PIC matrix from ArchRproject input
 Here, we have three samples, we compute the PIC matrix for each of them separately. 
+Then, they will be loaded to each of the samples. 
 ```{r eval=FALSE}
 pic_mat <- rep(list(), length = length(inputFiles))
 for (s in seq_along(inputFiles)) {
@@ -110,18 +123,68 @@ for (s in seq_along(inputFiles)) {
 ```
 
 # Add PIC matrix to ArchRproject object 
-Here we iteratively add PIC matrix to the ArchR object
+Here we iteratively add PIC matrix to the ArchR object. We have two options. 
+1. Overwrite the PeakMatrix. This will change the original PeakMatrix counts. 
+2. Create another data slot. 
+
+Below, we provide example codes for each setting. 
+## Overwrite original PeakMatrix
 ```{r eval=FALSE}
+## first, save the data.frame
+pks <- proj@peakSet
+names(pks) <- NULL
+pks = as.data.frame(pks)
+
 for (s in seq_along(inputFiles)) {
+  
+  ArchR:::.initializeMat(
+    ArrowFile = ArrowFiles[s], Group = "PeakMatrix",
+    Class = "integer", Units = "counts",
+    cellNames = colnames(pic_mat[[s]]),
+    featureDF = pks, params = "PeakMatrix",
+    force = TRUE
+  )
+
   ArchR:::.addMatToArrow(
     mat = pic_mat[[s]],
     ArrowFile = ArrowFiles[s],
-    group = "PIC",
+    Group = "PeakMatrix/matrix_content",
     binarize = FALSE
   )
 }
 ```
 
+## Create another data slot called "PIC"
+```{r eval=FALSE}
+## first, save the data.frame
+pks <- proj@peakSet
+names(pks) <- NULL
+pks = as.data.frame(pks)
+
+for (s in seq_along(inputFiles)) {
+  
+  ArchR:::.initializeMat(
+    ArrowFile = ArrowFiles[s], Group = "PIC",
+    Class = "integer", Units = "counts",
+    cellNames = colnames(pic_mat[[s]]),
+    featureDF = pks, params = "PIC",
+    force = TRUE
+  )
+
+  ArchR:::.addMatToArrow(
+    mat = pic_mat[[s]],
+    ArrowFile = ArrowFiles[s],
+    Group = "PIC/matrix_content",
+    binarize = FALSE
+  )
+}
+```
+
+# Get available Matrices
+The function below will display available cell-by-feature matrices you have. 
+```{r eval=FALSE}
+getAvailableMatrices(proj)
+```
 
 # Save and load ArchRProject
 
@@ -137,7 +200,7 @@ proj <- loadArchRProject(path = "HemeTutorial")
 # Reference
 If you used PIC-snATAC counting in your analysis, please cite our manuscript:
 
-Miao Z and Kim J. *Uniform quantification of single-nucleus ATAC-seq data with Paired- Insertion Counting (PIC) and a model-based insertion rate estimator.* _Nature Methods_ 2023 (In press)
+Miao Z, and Kim J. *Uniform quantification of single-nucleus ATAC-seq data with Paired-Insertion Counting (PIC) and a model-based insertion rate estimator.* _Nature Methods_ 21.1 (2024): 32-36.
 
 ArchR manuscript:
 	

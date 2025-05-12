@@ -354,16 +354,16 @@ data</h1>
 </div>
 
 
-<div id="content" class="section level3">
-<h3>content</h3>
+<div id="content" class="section level1">
+<h1>content</h1>
 <p>This Vignette contains an example to use PIC counting with
 dsc-ATAC-seq data. Specifically, this data type has more fragments per
 cell, making it more quantitative. However, due to bead overloading, we
 recommend setting deduplicate step during PIC counting step. Please see
 details below.</p>
 </div>
-<div id="required-libraries" class="section level3">
-<h3>required libraries</h3>
+<div id="required-libraries" class="section level1">
+<h1>required libraries</h1>
 <p>Please make sure the following libraries are installed and loaded for
 the analysis.</p>
 <pre class="r"><code>library(&quot;data.table&quot;)
@@ -371,8 +371,8 @@ library(&quot;GenomicRanges&quot;)
 library(&quot;Matrix&quot;)
 library(&quot;PICsnATAC&quot;)</code></pre>
 </div>
-<div id="input-files" class="section level3">
-<h3>Input files</h3>
+<div id="input-files" class="section level1">
+<h1>Input files</h1>
 <p>Below are the step-by-step instructions for obtaining these input.
 Example datasets can be downloaded from GEO: GSE123576 <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE123576">here</a>.
 Here in particular, we used the Mouse brain sample (Mouse #2, Channel
@@ -390,11 +390,12 @@ counting:</p>
 (<code>GSM3507349_Mouse2-Channel1.fragments.tsv.gz.tbi</code>)</li>
 </ul>
 </div>
-<div id="cell-barcodes" class="section level3">
-<h3>Cell Barcodes</h3>
+<div id="cell-barcodes" class="section level1">
+<h1>Cell Barcodes</h1>
 <p>If we want to keep the cells from the publications:</p>
-<pre class="r"><code>cm &lt;- read.table(&quot;GSE123576_mousebrain_cellData_revision.tsv&quot;, 
-                 sep = &quot;\t&quot;, header = TRUE)
+<pre class="r"><code>cm &lt;- read.table(&quot;GSE123576_mousebrain_cellData_revision.tsv&quot;,
+  sep = &quot;\t&quot;, header = TRUE
+)
 samples &lt;- sub(&quot;_B.*&quot;, &quot;&quot;, cm$DropBarcode)
 cm$sample &lt;- samples
 
@@ -402,16 +403,17 @@ cm$sample &lt;- samples
 cmtsample &lt;- cm[cm$sample == &quot;N701_Exp119_sample1_S1&quot;, ]
 cells &lt;- cmtsample$DropBarcode</code></pre>
 </div>
-<div id="peak-set" class="section level3">
-<h3>Peak set</h3>
+<div id="peak-set" class="section level1">
+<h1>Peak set</h1>
 <p>If we want to keep the set of peaks from the publication:</p>
-<pre class="r"><code>feature_df &lt;- read.csv(&quot;GSE123576_mousebrain_peaks_revision.bed&quot;, 
-                       sep = &quot;\t&quot;, header = FALSE)
+<pre class="r"><code>feature_df &lt;- read.csv(&quot;GSE123576_mousebrain_peaks_revision.bed&quot;,
+  sep = &quot;\t&quot;, header = FALSE
+)
 colnames(feature_df) &lt;- c(&quot;seqname&quot;, &quot;start&quot;, &quot;end&quot;)
 peak_sets &lt;- GenomicRanges::makeGRangesFromDataFrame(feature_df)</code></pre>
 </div>
-<div id="run-pic-and-save-output" class="section level3">
-<h3>Run PIC and save output</h3>
+<div id="run-pic-and-save-output" class="section level1">
+<h1>Run PIC and save output</h1>
 <p>Please note, for dsc-ATAC-seq data, because the beads are overloaded,
 we recommend to set <strong>deduplicate = TRUE</strong> so that we do
 not double count fragments. Although, based on our analysis, the
@@ -429,12 +431,14 @@ saveRDS(pic_mat, &quot;PIC_mat_1.rds&quot;)
 <p>Note if you have multiple matrices, please make sure you save them
 under different file names</p>
 </div>
-<div id="reference" class="section level3">
-<h3>Reference</h3>
+<div id="reference" class="section level1">
+<h1>Reference</h1>
 <p>If you used PIC-snATAC counting in your analysis, please cite our
 manuscript:</p>
-<p>Miao Z, Kim J. Is single nucleus ATAC-seq accessibility a qualitative
-or quantitative measurement?. <em>bioRxiv</em>. 2022.</p>
+<p>Miao Z, and Kim J. <em>Uniform quantification of single-nucleus
+ATAC-seq data with Paired-Insertion Counting (PIC) and a model-based
+insertion rate estimator.</em> <em>Nature Methods</em> 21.1 (2024):
+32-36.</p>
 <p>The dsc-ATAC-seq dataset is associated with the following
 publication:</p>
 <p>Lareau CA, Duarte FM, Chew JG, Kartha VK et al. Droplet-based

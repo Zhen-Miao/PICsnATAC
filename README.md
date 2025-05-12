@@ -102,6 +102,6 @@ data.](https://github.com/Zhen-Miao/PICsnATAC/blob/main/vignettes/Run_PIC_on_hum
 
 If you use PICsnATAC in your research, please cite our paper:
 
-Miao Z and Kim J. **Uniform quantification of single-nucleus ATAC-seq
-data with Paired- Insertion Counting (PIC) and a model-based insertion
-rate estimator.** *Nature Methods* 2023 (In press)
+Miao Z, and Kim J. *Uniform quantification of single-nucleus ATAC-seq
+data with Paired-Insertion Counting (PIC) and a model-based insertion
+rate estimator.* *Nature Methods* 21.1 (2024): 32-36.

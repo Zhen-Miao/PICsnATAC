@@ -354,13 +354,13 @@ workflow</h1>
 </div>
 
 
-<div id="content" class="section level3">
-<h3>content</h3>
+<div id="content" class="section level1">
+<h1>content</h1>
 <p>This Vignette contains an example to use PIC counting in ArchR
 workflow.</p>
 </div>
-<div id="required-libraries" class="section level3">
-<h3>required libraries</h3>
+<div id="required-libraries" class="section level1">
+<h1>required libraries</h1>
 <p>Please make sure the following libraries are installed and loaded for
 the analysis.</p>
 <pre class="r"><code>library(&quot;data.table&quot;)
@@ -369,8 +369,8 @@ library(&quot;Matrix&quot;)
 library(&quot;PICsnATAC&quot;)
 library(&quot;ArchR&quot;)</code></pre>
 </div>
-<div id="input-files" class="section level3">
-<h3>Input files</h3>
+<div id="input-files" class="section level1">
+<h1>Input files</h1>
 <p>Below are the step-by-step instructions for obtaining these input.
 Here we used the ArchR tutorial dataset to illustrate how to add PIC
 counting output to ArchR analysis. Please also refer to <a href="https://www.archrproject.com/articles/Articles/tutorial.html">ArchR
@@ -378,8 +378,8 @@ Vignettes</a> for additional information of ArchR workflow</p>
 <p>Please make sure to download the tutorial dataset by running
 <code>getTutorialData()</code> function:</p>
 </div>
-<div id="load-example-dataset-and-creating-arrow-files" class="section level3">
-<h3>Load Example Dataset and Creating Arrow Files</h3>
+<div id="load-example-dataset-and-creating-arrow-files" class="section level1">
+<h1>Load Example Dataset and Creating Arrow Files</h1>
 <p>Here we used ArchR example dataset as</p>
 <pre class="r"><code>inputFiles &lt;- getTutorialData(&quot;Hematopoiesis&quot;)
 # inputFiles
@@ -389,12 +389,12 @@ ArrowFiles &lt;- createArrowFiles(
   sampleNames = names(inputFiles),
   minTSS = 4, # Dont set this too high because you can always increase later
   minFrags = 1000,
-  addTileMat = FALSE,
+  addTileMat = TRUE,
   addGeneScoreMat = FALSE
 )</code></pre>
 </div>
-<div id="inferring-doublet" class="section level3">
-<h3>Inferring doublet</h3>
+<div id="inferring-doublet" class="section level1">
+<h1>Inferring doublet</h1>
 <p>We have this section as ArchR tutorial recommended. But this is
 option and please make sure you understand the process of doublet
 inferrence before executing this part</p>
@@ -405,17 +405,26 @@ inferrence before executing this part</p>
   LSIMethod = 1
 )</code></pre>
 </div>
-<div id="create-an-archrproject" class="section level3">
-<h3>Create an ArchRproject</h3>
+<div id="create-an-archrproject" class="section level1">
+<h1>Create an ArchRproject</h1>
 <pre class="r"><code>proj &lt;- ArchRProject(
   ArrowFiles = ArrowFiles,
   outputDirectory = &quot;HemeTutorial&quot;,
-  copyArrows = TRUE # This is recommened so that you maintain an unaltered 
+  copyArrows = TRUE # This is recommened so that you maintain an unaltered
   ## copy for later usage.
 )</code></pre>
 </div>
-<div id="peak-calling-with-macs2" class="section level3">
-<h3>Peak calling with MACS2</h3>
+<div id="clustering-with-iterative-lsi" class="section level1">
+<h1>Clustering with iterative LSI</h1>
+<p>By default, ArchR will do peak calling with MACS2 for each cluster,
+so we will need to run the following functions to generate clusters.</p>
+<pre class="r"><code>proj &lt;- addIterativeLSI(ArchRProj = proj, useMatrix = &quot;TileMatrix&quot;,
+                        name = &quot;IterativeLSI&quot;)
+proj &lt;- addClusters(input = proj, reducedDims = &quot;IterativeLSI&quot;)
+proj &lt;- addGroupCoverages(proj)</code></pre>
+</div>
+<div id="peak-calling-with-macs2" class="section level1">
+<h1>Peak calling with MACS2</h1>
 <p>Please make sure MACS2 is installed before running this. ArchR also
 supports other peak calling methods, please refer to ArchR manual for
 additional options.</p>
@@ -425,10 +434,10 @@ proj &lt;- addReproduciblePeakSet(
   pathToMacs2 = pathToMacs2
 )</code></pre>
 </div>
-<div id="obtain-pic-matrix-from-archrproject-input" class="section level3">
-<h3>Obtain PIC matrix from ArchRproject input</h3>
+<div id="obtain-pic-matrix-from-archrproject-input" class="section level1">
+<h1>Obtain PIC matrix from ArchRproject input</h1>
 <p>Here, we have three samples, we compute the PIC matrix for each of
-them separately.</p>
+them separately. Then, they will be loaded to each of the samples.</p>
 <pre class="r"><code>pic_mat &lt;- rep(list(), length = length(inputFiles))
 for (s in seq_along(inputFiles)) {
   ## select one sample
@@ -458,32 +467,83 @@ for (s in seq_along(inputFiles)) {
 # pic_mat_comb &lt;- do.call(cbind, pic_mat)
 # pic_mat_comb &lt;- pic_mat_comb[,rownames(getCellColData(proj))]</code></pre>
 </div>
-<div id="add-pic-matrix-to-archrproject-object" class="section level3">
-<h3>Add PIC matrix to ArchRproject object</h3>
-<p>Here we iteratively add PIC matrix to the ArchR object</p>
-<pre class="r"><code>for (s in seq_along(inputFiles)) {
+<div id="add-pic-matrix-to-archrproject-object" class="section level1">
+<h1>Add PIC matrix to ArchRproject object</h1>
+<p>Here we iteratively add PIC matrix to the ArchR object. We have two
+options. 1. Overwrite the PeakMatrix. This will change the original
+PeakMatrix counts. 2. Create another data slot.</p>
+<p>Below, we provide example codes for each setting. ## Overwrite
+original PeakMatrix</p>
+<pre class="r"><code>## first, save the data.frame
+pks &lt;- proj@peakSet
+names(pks) &lt;- NULL
+pks = as.data.frame(pks)
+
+for (s in seq_along(inputFiles)) {
+  
+  ArchR:::.initializeMat(
+    ArrowFile = ArrowFiles[s], Group = &quot;PeakMatrix&quot;,
+    Class = &quot;integer&quot;, Units = &quot;counts&quot;,
+    cellNames = colnames(pic_mat[[s]]),
+    featureDF = pks, params = &quot;PeakMatrix&quot;,
+    force = TRUE
+  )
+
   ArchR:::.addMatToArrow(
     mat = pic_mat[[s]],
     ArrowFile = ArrowFiles[s],
-    group = &quot;PIC&quot;,
+    Group = &quot;PeakMatrix/matrix_content&quot;,
+    binarize = FALSE
+  )
+}</code></pre>
+<div id="create-another-data-slot-called-pic" class="section level2">
+<h2>Create another data slot called “PIC”</h2>
+<pre class="r"><code>## first, save the data.frame
+pks &lt;- proj@peakSet
+names(pks) &lt;- NULL
+pks = as.data.frame(pks)
+
+for (s in seq_along(inputFiles)) {
+  
+  ArchR:::.initializeMat(
+    ArrowFile = ArrowFiles[s], Group = &quot;PIC&quot;,
+    Class = &quot;integer&quot;, Units = &quot;counts&quot;,
+    cellNames = colnames(pic_mat[[s]]),
+    featureDF = pks, params = &quot;PIC&quot;,
+    force = TRUE
+  )
+
+  ArchR:::.addMatToArrow(
+    mat = pic_mat[[s]],
+    ArrowFile = ArrowFiles[s],
+    Group = &quot;PIC/matrix_content&quot;,
     binarize = FALSE
   )
 }</code></pre>
 </div>
-<div id="save-and-load-archrproject" class="section level3">
-<h3>Save and load ArchRProject</h3>
+</div>
+<div id="get-available-matrices" class="section level1">
+<h1>Get available Matrices</h1>
+<p>The function below will display available cell-by-feature matrices
+you have.</p>
+<pre class="r"><code>getAvailableMatrices(proj)</code></pre>
+</div>
+<div id="save-and-load-archrproject" class="section level1">
+<h1>Save and load ArchRProject</h1>
 <pre class="r"><code>## to save object
 proj &lt;- saveArchRProject(ArchRProj = proj)
 
 ## to load object
 proj &lt;- loadArchRProject(path = &quot;HemeTutorial&quot;)</code></pre>
 </div>
-<div id="reference" class="section level3">
-<h3>Reference</h3>
+<div id="reference" class="section level1">
+<h1>Reference</h1>
 <p>If you used PIC-snATAC counting in your analysis, please cite our
 manuscript:</p>
-<p>Miao Z, Kim J. Is single nucleus ATAC-seq accessibility a qualitative
-or quantitative measurement?. <em>bioRxiv</em>. 2022.</p>
+<p>Miao Z, and Kim J. <em>Uniform quantification of single-nucleus
+ATAC-seq data with Paired-Insertion Counting (PIC) and a model-based
+insertion rate estimator.</em> <em>Nature Methods</em> 21.1 (2024):
+32-36.</p>
 <p>ArchR manuscript:</p>
 <p>Granja, Jeffrey M., et al. “ArchR is a scalable software package for
 integrative single-cell chromatin accessibility analysis.” <em>Nature

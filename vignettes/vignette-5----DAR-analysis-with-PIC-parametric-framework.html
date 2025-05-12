@@ -354,8 +354,8 @@ parametric framework</h1>
 </div>
 
 
-<div id="content" class="section level3">
-<h3>Content</h3>
+<div id="content" class="section level1">
+<h1>Content</h1>
 <p>This Vignette contains an example to conduct DAR analysis with PIC
 parametric framework. We developed a statistical framework to test the
 differential accessible regions (DARs) between cell types. Our framework
@@ -363,8 +363,8 @@ incorporated the distribution of snATAC-seq count data (PIC count, can
 also run on fragment count), and will have a higher power in detecting
 DARs in snATAC-seq data</p>
 </div>
-<div id="required-libraries" class="section level3">
-<h3>Required libraries</h3>
+<div id="required-libraries" class="section level1">
+<h1>Required libraries</h1>
 <p>Please make sure the following libraries are installed and loaded for
 the analysis.</p>
 <pre class="r"><code>library(&quot;data.table&quot;)
@@ -372,8 +372,8 @@ library(&quot;GenomicRanges&quot;)
 library(&quot;Matrix&quot;)
 library(&quot;PICsnATAC&quot;)</code></pre>
 </div>
-<div id="input-files" class="section level3">
-<h3>Input files</h3>
+<div id="input-files" class="section level1">
+<h1>Input files</h1>
 <p>The PIC test framework requires the following input:</p>
 <ul>
 <li>peak by cell PIC count matrix (<code>pic_mat</code>)</li>
@@ -384,8 +384,8 @@ library(&quot;PICsnATAC&quot;)</code></pre>
 with Seurat, ArchR, or other pipelines. Below, we describe the two steps
 of the test</p>
 </div>
-<div id="cell-specific-capturing-rate-estimation" class="section level3">
-<h3>Cell-specific capturing rate estimation</h3>
+<div id="cell-specific-capturing-rate-estimation" class="section level1">
+<h1>Cell-specific capturing rate estimation</h1>
 <p>As described in the manuscript, in the snATAC-seq data, each cell may
 have largely variant capturing rate (sequencing depth), and here, we
 will compute the caputuring rate in each cell while separating the
@@ -405,8 +405,8 @@ type</li>
 </ul>
 <p>The second element will be the input of the next function</p>
 </div>
-<div id="dar-test" class="section level3">
-<h3>DAR test</h3>
+<div id="dar-test" class="section level1">
+<h1>DAR test</h1>
 <p>With the cell-specific caputuring rate, we can now execute our DAR
 test function</p>
 <pre class="r"><code>p_vals &lt;- DAR_by_LRT(pic_mat = pic_mat, capturing_rates = r_by_ct_out$q_vec, cell_type_labels = cell_types)</code></pre>
@@ -426,8 +426,8 @@ rm2 &lt;- rowSums(pic_mat[, cell_types == cell_type_set[2]] %*%
   sum(cell_types == cell_type_set[2])
 
 ## sequencing depth corrected log fold change
-log_fc_depth_corrected &lt;- log(rm2 + 0.0001) - log(rm1 + 0.0001) # 0.0001 is 
- ## added to prevent log(0)
+log_fc_depth_corrected &lt;- log(rm2 + 0.0001) - log(rm1 + 0.0001) # 0.0001 is
+## added to prevent log(0)
 
 ## in situations sequencing depth disparity is not a concern, we can also
 ## use the uncorrected mean accessibility value, the codes are
@@ -435,15 +435,17 @@ log_fc_depth_corrected &lt;- log(rm2 + 0.0001) - log(rm1 + 0.0001) # 0.0001 is
 rm1_unc &lt;- rowMeans(pic_mat[, cell_types == cell_type_set[1]])
 rm2_unc &lt;- rowMeans(pic_mat[, cell_types == cell_type_set[2]])
 
-log_fc_uncorrected &lt;- log(rm2_unc + 0.0001) - log(rm1_unc + 0.0001) # 0.0001 
-  ## is added to prevent log(0)</code></pre>
+log_fc_uncorrected &lt;- log(rm2_unc + 0.0001) - log(rm1_unc + 0.0001) # 0.0001
+## is added to prevent log(0)</code></pre>
 </div>
-<div id="reference" class="section level3">
-<h3>Reference</h3>
+<div id="reference" class="section level1">
+<h1>Reference</h1>
 <p>If you used PIC-snATAC counting in your analysis, please cite our
 manuscript:</p>
-<p>Miao Z, Kim J. Is single nucleus ATAC-seq accessibility a qualitative
-or quantitative measurement?. <em>bioRxiv</em>. 2022.</p>
+<p>Miao Z, and Kim J. <em>Uniform quantification of single-nucleus
+ATAC-seq data with Paired-Insertion Counting (PIC) and a model-based
+insertion rate estimator.</em> <em>Nature Methods</em> 21.1 (2024):
+32-36.</p>
 </div>
 
 

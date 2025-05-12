@@ -100,4 +100,4 @@ Notebook 2: [Run PIC DAR on SNARE-seq2 brain  data.](https://github.com/Zhen-Mia
 
 If you use PICsnATAC in your research, please cite our paper:
 
-Miao Z and Kim J. **Uniform quantification of single-nucleus ATAC-seq data with Paired- Insertion Counting (PIC) and a model-based insertion rate estimator.** _Nature Methods_ 2023 (In press)
+Miao Z, and Kim J. *Uniform quantification of single-nucleus ATAC-seq data with Paired-Insertion Counting (PIC) and a model-based insertion rate estimator.* _Nature Methods_ 21.1 (2024): 32-36.
