@@ -1,0 +1,29 @@
+[project]
+name = "picsnATAC"
+version = "0.3.1"
+description = "Paired Insertion Counting for single-nucleus ATAC-seq data"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Zhen Miao", email = "zmiao@pennmedicine.upenn.edu"},
+    {name = "Junhyong Kim"},
+]
+dependencies = [
+    "numpy>=1.22",
+    "pandas>=1.4",
+    "scipy>=1.8",
+    "pysam>=0.20",
+    "tqdm>=4.60",
+    "joblib>=1.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "pytest-cov"]
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["picsnATAC*"]
