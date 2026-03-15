@@ -1,0 +1,230 @@
+# Vignette 3 -- PIC counting in ArchR workflow
+
+## content
+
+This Vignette contains an example to use PIC counting in ArchR workflow.
+
+## required libraries
+
+Please make sure the following libraries are installed and loaded for
+the analysis.
+
+``` r
+library("data.table")
+library("GenomicRanges")
+library("Matrix")
+library("PICsnATAC")
+library("ArchR")
+```
+
+## Input files
+
+Below are the step-by-step instructions for obtaining these input. Here
+we used the ArchR tutorial dataset to illustrate how to add PIC counting
+output to ArchR analysis. Please also refer to [ArchR
+Vignettes](https://www.archrproject.com/articles/Articles/tutorial.html)
+for additional information of ArchR workflow
+
+Please make sure to download the tutorial dataset by running
+`getTutorialData()` function:
+
+## Load Example Dataset and Creating Arrow Files
+
+Here we used ArchR example dataset as
+
+``` r
+inputFiles <- getTutorialData("Hematopoiesis")
+# inputFiles
+addArchRGenome("hg19")
+ArrowFiles <- createArrowFiles(
+  inputFiles = inputFiles,
+  sampleNames = names(inputFiles),
+  minTSS = 4, # Dont set this too high because you can always increase later
+  minFrags = 1000,
+  addTileMat = TRUE,
+  addGeneScoreMat = FALSE
+)
+```
+
+## Inferring doublet
+
+We have this section as ArchR tutorial recommended. But this is option
+and please make sure you understand the process of doublet inferrence
+before executing this part
+
+``` r
+doubScores <- addDoubletScores(
+  input = ArrowFiles,
+  k = 10, # Refers to how many cells near a "pseudo-doublet" to count.
+  knnMethod = "UMAP", # Refers to the embedding to use for nearest neighbor search.
+  LSIMethod = 1
+)
+```
+
+## Create an ArchRproject
+
+``` r
+proj <- ArchRProject(
+  ArrowFiles = ArrowFiles,
+  outputDirectory = "HemeTutorial",
+  copyArrows = TRUE # This is recommened so that you maintain an unaltered
+  ## copy for later usage.
+)
+```
+
+## Clustering with iterative LSI
+
+By default, ArchR will do peak calling with MACS2 for each cluster, so
+we will need to run the following functions to generate clusters.
+
+``` r
+proj <- addIterativeLSI(ArchRProj = proj, useMatrix = "TileMatrix",
+                        name = "IterativeLSI")
+proj <- addClusters(input = proj, reducedDims = "IterativeLSI")
+proj <- addGroupCoverages(proj)
+```
+
+## Peak calling with MACS2
+
+Please make sure MACS2 is installed before running this. ArchR also
+supports other peak calling methods, please refer to ArchR manual for
+additional options.
+
+``` r
+pathToMacs2 <- findMacs2()
+proj <- addReproduciblePeakSet(
+  ArchRProj = proj,
+  pathToMacs2 = pathToMacs2
+)
+```
+
+## Obtain PIC matrix from ArchRproject input
+
+Here, we have three samples, we compute the PIC matrix for each of them
+separately. Then, they will be loaded to each of the samples.
+
+``` r
+pic_mat <- rep(list(), length = length(inputFiles))
+for (s in seq_along(inputFiles)) {
+  ## select one sample
+  sample_sel <- names(inputFiles)[s]
+  allCells <- rownames(getCellColData(proj)) ## all cells after filtering
+  cells_sample <- allCells[startsWith(allCells, sample_sel)]
+  cells_sample_name_trunc <- sub(".*\\#", "", cells_sample)
+
+  peak_sets <- proj@peakSet ## the peak set, from MACS2 peak calling results
+  names(peak_sets) <- NULL ## remove the peakset names
+  fragment_tsv_gz_file_location <- inputFiles[s]
+
+  pic_mat[[s]] <- PIC_counting(
+    cells = cells_sample_name_trunc,
+    fragment_tsv_gz_file_location = fragment_tsv_gz_file_location,
+    peak_sets = peak_sets
+  )
+
+  ## change back the cell names to match with original input
+  colnames(pic_mat[[s]]) <- cells_sample
+}
+
+## we can run the following codes to get the complete peak by cell matrix
+## and we may save this matrix for tuture uses (e.g., if we hope to run
+## other analyses)
+
+# pic_mat_comb <- do.call(cbind, pic_mat)
+# pic_mat_comb <- pic_mat_comb[,rownames(getCellColData(proj))]
+```
+
+## Add PIC matrix to ArchRproject object
+
+Here we iteratively add PIC matrix to the ArchR object. We have two
+options. 1. Overwrite the PeakMatrix. This will change the original
+PeakMatrix counts. 2. Create another data slot.
+
+Below, we provide example codes for each setting. \## Overwrite original
+PeakMatrix
+
+``` r
+## first, save the data.frame
+pks <- proj@peakSet
+names(pks) <- NULL
+pks = as.data.frame(pks)
+
+for (s in seq_along(inputFiles)) {
+  
+  ArchR:::.initializeMat(
+    ArrowFile = ArrowFiles[s], Group = "PeakMatrix",
+    Class = "integer", Units = "counts",
+    cellNames = colnames(pic_mat[[s]]),
+    featureDF = pks, params = "PeakMatrix",
+    force = TRUE
+  )
+
+  ArchR:::.addMatToArrow(
+    mat = pic_mat[[s]],
+    ArrowFile = ArrowFiles[s],
+    Group = "PeakMatrix/matrix_content",
+    binarize = FALSE
+  )
+}
+```
+
+### Create another data slot called “PIC”
+
+``` r
+## first, save the data.frame
+pks <- proj@peakSet
+names(pks) <- NULL
+pks = as.data.frame(pks)
+
+for (s in seq_along(inputFiles)) {
+  
+  ArchR:::.initializeMat(
+    ArrowFile = ArrowFiles[s], Group = "PIC",
+    Class = "integer", Units = "counts",
+    cellNames = colnames(pic_mat[[s]]),
+    featureDF = pks, params = "PIC",
+    force = TRUE
+  )
+
+  ArchR:::.addMatToArrow(
+    mat = pic_mat[[s]],
+    ArrowFile = ArrowFiles[s],
+    Group = "PIC/matrix_content",
+    binarize = FALSE
+  )
+}
+```
+
+## Get available Matrices
+
+The function below will display available cell-by-feature matrices you
+have.
+
+``` r
+getAvailableMatrices(proj)
+```
+
+## Save and load ArchRProject
+
+``` r
+## to save object
+proj <- saveArchRProject(ArchRProj = proj)
+
+## to load object
+proj <- loadArchRProject(path = "HemeTutorial")
+```
+
+## Reference
+
+If you used PIC-snATAC counting in your analysis, please cite our
+manuscript:
+
+Miao Z, and Kim J. *Uniform quantification of single-nucleus ATAC-seq
+data with Paired-Insertion Counting (PIC) and a model-based insertion
+rate estimator.* *Nature Methods* 21.1 (2024): 32-36.
+
+ArchR manuscript:
+
+Granja, Jeffrey M., et al. “ArchR is a scalable software package for
+integrative single-cell chromatin accessibility analysis.” *Nature
+genetics* 53.3 (2021): 403-411.

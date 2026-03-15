@@ -1,0 +1,60 @@
+# Count snATAC-seq data matrix with Paired Insertion Counting (PIC)
+
+Count snATAC-seq data matrix with Paired Insertion Counting (PIC)
+
+## Usage
+
+``` r
+PIC_counting(
+  cells,
+  fragment_tsv_gz_file_location,
+  peak_sets,
+  deduplicate = FALSE,
+  load_full = TRUE,
+  extend_size = 5L,
+  verbose = TRUE
+)
+```
+
+## Arguments
+
+- cells:
+
+  The cell barcode lables as a Character vector
+
+- fragment_tsv_gz_file_location:
+
+  The 10X Cell Ranger output fragment.tsv.gz file location. This can
+  usually be found at the /out directory from Cell Ranger output
+
+- peak_sets:
+
+  The set of peaks as a GenomicRanges object. This will be the features
+  for the data matrix. Alternatively, this can be a data.frame and the
+  function will convert it into a GenomicRanges object
+
+- deduplicate:
+
+  Whether to include deduplicate step where within the same cell,
+  fragments with identical start and end location will be deduplicated.
+  This is usually unnecessisary from Cell Ranger ATAC output, since Cell
+  Ranger ATAC has already deduplicated the fragments. But for
+  dsc-ATAC-seq data, this step will be helpful and recommended.
+
+- load_full:
+
+  Whether to load the whole fragment.tsv.gz file into memory. If set to
+  FALSE, the function will load it dynamically to save RAM
+
+- extend_size:
+
+  How long should we extend the exact insertion site as accessible
+  window
+
+- verbose:
+
+  Whether to output progress information including the progress bar
+
+## Value
+
+The peak by cell PIC count matrix

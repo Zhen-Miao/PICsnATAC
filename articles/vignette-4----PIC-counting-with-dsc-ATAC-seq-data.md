@@ -1,0 +1,104 @@
+# Vignette 4 -- PIC counting with dsc-ATAC-seq data
+
+## content
+
+This Vignette contains an example to use PIC counting with dsc-ATAC-seq
+data. Specifically, this data type has more fragments per cell, making
+it more quantitative. However, due to bead overloading, we recommend
+setting deduplicate step during PIC counting step. Please see details
+below.
+
+## required libraries
+
+Please make sure the following libraries are installed and loaded for
+the analysis.
+
+``` r
+library("data.table")
+library("GenomicRanges")
+library("Matrix")
+library("PICsnATAC")
+```
+
+## Input files
+
+Below are the step-by-step instructions for obtaining these input.
+Example datasets can be downloaded from GEO: GSE123576
+[here](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE123576).
+Here in particular, we used the Mouse brain sample (Mouse \#2, Channel
+\#1).
+
+Please make sure to download the following files for PIC counting:
+
+- cell barcodes with metadata
+  (`GSE123576_mousebrain_cellData_revision.tsv`)
+- list of peak regions (`GSE123576_mousebrain_peaks_revision.bed`)
+- fragment files (`GSM3507349_Mouse2-Channel1.fragments.tsv.gz`)
+- fragment file index
+  (`GSM3507349_Mouse2-Channel1.fragments.tsv.gz.tbi`)
+
+## Cell Barcodes
+
+If we want to keep the cells from the publications:
+
+``` r
+cm <- read.table("GSE123576_mousebrain_cellData_revision.tsv",
+  sep = "\t", header = TRUE
+)
+samples <- sub("_B.*", "", cm$DropBarcode)
+cm$sample <- samples
+
+## choose sample
+cmtsample <- cm[cm$sample == "N701_Exp119_sample1_S1", ]
+cells <- cmtsample$DropBarcode
+```
+
+## Peak set
+
+If we want to keep the set of peaks from the publication:
+
+``` r
+feature_df <- read.csv("GSE123576_mousebrain_peaks_revision.bed",
+  sep = "\t", header = FALSE
+)
+colnames(feature_df) <- c("seqname", "start", "end")
+peak_sets <- GenomicRanges::makeGRangesFromDataFrame(feature_df)
+```
+
+## Run PIC and save output
+
+Please note, for dsc-ATAC-seq data, because the beads are overloaded, we
+recommend to set **deduplicate = TRUE** so that we do not double count
+fragments. Although, based on our analysis, the fragment.tsv.gz file
+provided in GEO has already been de-duplicated, we still recommend doing
+so for all dsc-ATAC-seq data.
+
+``` r
+fragment_tsv_gz_file_location <- "GSM3507349_Mouse2-Channel1.fragments.tsv.gz"
+pic_mat <- PIC_counting(
+  cells = cells,
+  fragment_tsv_gz_file_location = fragment_tsv_gz_file_location,
+  peak_sets = peak_sets,
+  deduplicate = TRUE
+)
+saveRDS(pic_mat, "PIC_mat_1.rds")
+## if you have multiple matrices, don't forget to save under different names
+```
+
+Note if you have multiple matrices, please make sure you save them under
+different file names
+
+## Reference
+
+If you used PIC-snATAC counting in your analysis, please cite our
+manuscript:
+
+Miao Z, and Kim J. *Uniform quantification of single-nucleus ATAC-seq
+data with Paired-Insertion Counting (PIC) and a model-based insertion
+rate estimator.* *Nature Methods* 21.1 (2024): 32-36.
+
+The dsc-ATAC-seq dataset is associated with the following publication:
+
+Lareau CA, Duarte FM, Chew JG, Kartha VK et al. Droplet-based
+combinatorial indexing for massive-scale single-cell chromatin
+accessibility. *Nat Biotechnol*. 2019 Aug;37(8):916-924.

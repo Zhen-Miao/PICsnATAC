@@ -1,0 +1,114 @@
+# Vignette 2 -- PIC counting in Seurat/Signac workflow
+
+## content
+
+This Vignette contains an example to use PIC counting in Seurat
+workflow.
+
+## required libraries
+
+Please make sure the following libraries are installed and loaded for
+the analysis.
+
+``` r
+library("data.table")
+library("GenomicRanges")
+library("Matrix")
+library("PICsnATAC")
+library("Signac")
+library("Seurat")
+```
+
+## Input files
+
+Input files for PIC counting includes:
+
+- cell barcodes with metadata (`singlecell.csv`)
+- list of peak regions (`peaks.bed`)
+- fragment files (`fragment.tsv.gz`)
+- fragment file index (`fragment.tsv.gz.tbi`)
+
+Below are the step-by-step instructions for obtaining these input from
+10X Cell Ranger output files. Example datasets can be downloaded from
+10X Genomics website
+[here](https://www.10xgenomics.com/resources/datasets/5-k-peripheral-blood-mononuclear-cells-pbm-cs-from-a-healthy-donor-next-gem-v-1-1-1-1-standard-2-0-0).
+
+Please also refer to [Signac
+Vignettes](https://satijalab.org/signac/articles/pbmc_vignette.html) for
+additional information of Signac workflow
+
+## Cell Barcodes
+
+If we want to keep the cells from Cell Ranger filtering scheme:
+
+``` r
+meta.data <- read.csv("atac_pbmc_5k_nextgem_singlecell.csv", header = TRUE)
+# -- in your own Cell Ranger output, the file name will be 'singlecell.csv'
+meta.data_filtered <- meta.data[meta.data$is__cell_barcode == 1, ]
+cells <- meta.data_filtered$barcode
+```
+
+## Peak set
+
+If we want to keep the set of peaks from Cell Ranger:
+
+``` r
+peaks <- data.table::fread("atac_pbmc_5k_nextgem_peaks.bed", header = FALSE)
+# -- in your own Cell Ranger output, the file name will be 'peaks.bed'
+colnames(peaks) <- c("seqname", "start", "end")
+peak_sets <- GenomicRanges::makeGRangesFromDataFrame(peaks)
+```
+
+Note, the codes will be the same for MACS2 called peaks, just change the
+file name
+
+## Run PIC and save output
+
+``` r
+fragment_tsv_gz_file_location <- "atac_pbmc_5k_nextgem_fragments.tsv.gz"
+pic_mat <- PIC_counting(
+  cells = cells,
+  fragment_tsv_gz_file_location = fragment_tsv_gz_file_location,
+  peak_sets = peak_sets
+)
+saveRDS(pic_mat, "PIC_mat_1.rds")
+## if you have multiple matrices, don't forget to save under different names
+```
+
+Note if you have multiple matrices, please make sure you save them under
+different file names
+
+## Create Seurat Object with PIC output
+
+``` r
+counts <- readRDS("PIC_mat_1.rds")
+
+chrom_assay <- CreateChromatinAssay(
+  counts = counts,
+  sep = c(":", "-"),
+  genome = "hg19",
+  fragments = fragment_tsv_gz_file_location,
+  min.cells = 10,
+  min.features = 200
+)
+
+pbmc <- CreateSeuratObject(
+  counts = chrom_assay,
+  assay = "peaks",
+  meta.data = metadata
+)
+```
+
+## Reference
+
+If you used PIC-snATAC counting in your analysis, please cite our
+manuscript:
+
+Miao Z, and Kim J. *Uniform quantification of single-nucleus ATAC-seq
+data with Paired-Insertion Counting (PIC) and a model-based insertion
+rate estimator.* *Nature Methods* 21.1 (2024): 32-36.
+
+Signac manuscript:
+
+Stuart, Tim, et al. “Single-cell chromatin state analysis with Signac.”
+*Nature methods* 18.11 (2021): 1333-1341.

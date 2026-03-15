@@ -1,0 +1,106 @@
+# Vignette 5 -- DAR analysis with PIC parametric framework
+
+## Content
+
+This Vignette contains an example to conduct DAR analysis with PIC
+parametric framework. We developed a statistical framework to test the
+differential accessible regions (DARs) between cell types. Our framework
+incorporated the distribution of snATAC-seq count data (PIC count, can
+also run on fragment count), and will have a higher power in detecting
+DARs in snATAC-seq data
+
+## Required libraries
+
+Please make sure the following libraries are installed and loaded for
+the analysis.
+
+``` r
+library("data.table")
+library("GenomicRanges")
+library("Matrix")
+library("PICsnATAC")
+```
+
+## Input files
+
+The PIC test framework requires the following input:
+
+- peak by cell PIC count matrix (`pic_mat`)
+- cell type labels (`cell_types`)
+
+Note, please refer to our vignettes for obtaining `pic_mat`, and
+clustering and annotation can be conducted with Seurat, ArchR, or other
+pipelines. Below, we describe the two steps of the test
+
+## Cell-specific capturing rate estimation
+
+As described in the manuscript, in the snATAC-seq data, each cell may
+have largely variant capturing rate (sequencing depth), and here, we
+will compute the caputuring rate in each cell while separating the
+effect of cell type-specific open probability
+
+``` r
+r_by_ct_out <- get_r_by_ct_mat_pq(
+  cell_type_set = unique(cell_types),
+  r_by_c = pic_mat,
+  cell_type_labels = cell_types,
+  n_features_per_cell = dim(pic_mat)[1]
+)
+```
+
+The object `r_by_ct_out` is a list with two elements,
+
+- **p_by_t** Peak by cell type matrix, each element represents the open
+  probability of the peak in the corresponding cell type
+- **q_vec** A vector of cell-specific capturing rate
+
+The second element will be the input of the next function
+
+## DAR test
+
+With the cell-specific caputuring rate, we can now execute our DAR test
+function
+
+``` r
+p_vals <- DAR_by_LRT(pic_mat = pic_mat, capturing_rates = r_by_ct_out$q_vec, cell_type_labels = cell_types)
+```
+
+The output is a p value vector, specifying the p value for each peak. In
+addition, you can calculate the mean log fold change after adjusting for
+the capturing rate to add additional criteria for determining the set of
+DAR. The example code is provided below:
+
+``` r
+cell_type_set <- unique(cell_types)
+capturing_rates <- r_by_ct_out$q_vec
+
+## mean accessibility values after correcting for sequencing depth
+rm1 <- rowSums(pic_mat[, cell_types == cell_type_set[1]] %*%
+  diag(1 / capturing_rates[cell_types == cell_type_set[1]])) /
+  sum(cell_types == cell_type_set[1])
+rm2 <- rowSums(pic_mat[, cell_types == cell_type_set[2]] %*%
+  diag(1 / capturing_rates[cell_types == cell_type_set[2]])) /
+  sum(cell_types == cell_type_set[2])
+
+## sequencing depth corrected log fold change
+log_fc_depth_corrected <- log(rm2 + 0.0001) - log(rm1 + 0.0001) # 0.0001 is
+## added to prevent log(0)
+
+## in situations sequencing depth disparity is not a concern, we can also
+## use the uncorrected mean accessibility value, the codes are
+
+rm1_unc <- rowMeans(pic_mat[, cell_types == cell_type_set[1]])
+rm2_unc <- rowMeans(pic_mat[, cell_types == cell_type_set[2]])
+
+log_fc_uncorrected <- log(rm2_unc + 0.0001) - log(rm1_unc + 0.0001) # 0.0001
+## is added to prevent log(0)
+```
+
+## Reference
+
+If you used PIC-snATAC counting in your analysis, please cite our
+manuscript:
+
+Miao Z, and Kim J. *Uniform quantification of single-nucleus ATAC-seq
+data with Paired-Insertion Counting (PIC) and a model-based insertion
+rate estimator.* *Nature Methods* 21.1 (2024): 32-36.
