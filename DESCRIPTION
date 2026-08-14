@@ -27,6 +27,7 @@ Imports:
     IRanges,
     GenomicRanges,
     Rsamtools,
+    R.utils,
     stats,
     progress
 License: MIT + file LICENSE

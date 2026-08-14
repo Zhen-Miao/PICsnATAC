@@ -30,6 +30,13 @@ load_fragments <- function(
   if (!is.logical(verbose) || length(verbose) != 1L || is.na(verbose)) {
     stop("verbose must be TRUE or FALSE", call. = FALSE)
   }
+  if (grepl("[.]gz$", fragment_tsv_gz_file_location, ignore.case = TRUE) &&
+      !R.utils::isGzipped(fragment_tsv_gz_file_location)) {
+    stop(
+      "fragment_tsv_gz_file_location has a .gz extension but is not gzip-compressed",
+      call. = FALSE
+    )
+  }
 
   f1 <- data.table::fread(fragment_tsv_gz_file_location,
     header = FALSE,

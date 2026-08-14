@@ -10,3 +10,5 @@
 - Binarize dense and sparse inputs correctly in `get_r_by_ct_mat_pq()` and add
   stable convergence and input validation.
 - Expand automated tests, package metadata, and continuous integration checks.
+- Declare the `R.utils` runtime dependency required by `data.table::fread()`
+  when reading gzip-compressed fragment files.
