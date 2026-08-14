@@ -11,3 +11,10 @@
 ^pkgdown$
 ^\.github$
 ^\.renvignore$
+^REVIEW\.md$
+^\.workbuddy$
+^HemeTutorial$
+^.*\.arrow$
+(^|/)\.DS_Store$
+^tmp$
+^man/figures/.*\.(heic|pdf)$

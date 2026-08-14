@@ -6,12 +6,12 @@
 #'  open probability
 #'  and cell-specific capturing rates
 #'
-#' @importFrom methods is as
 #' @param cell_type_set A vector containing all cell types
-#' @param r_by_c Input matrix, region (peak) by cell
+#' @param r_by_c Input region (peak) by cell matrix. Nonzero entries are
+#'  binarized internally.
 #' @param cell_type_labels A vector containing cell type labels
 #' @param n_features_per_cell The number of features in the matrix,
-#'  can be calculated by nrow(r_by_c)
+#'  defaulting to `nrow(r_by_c)`. If supplied, it must match that value.
 #' @param p_acc The accuracy of p, default specified as 0.0005
 #' @param q_acc The accuracy of q, default specified as 0.0005
 #' @param n_max_iter The maximum iteration, default = 800
@@ -27,92 +27,146 @@
 get_r_by_ct_mat_pq <- function(cell_type_set,
                                r_by_c,
                                cell_type_labels,
-                               n_features_per_cell,
+                               n_features_per_cell = nrow(r_by_c),
                                p_acc = 0.0005,
                                q_acc = 0.0005,
                                n_max_iter = 800,
                                verbose = TRUE) {
+  if (!is.matrix(r_by_c) && !methods::is(r_by_c, "Matrix")) {
+    stop("r_by_c must be a matrix or Matrix object", call. = FALSE)
+  }
+  if (nrow(r_by_c) == 0L || ncol(r_by_c) == 0L) {
+    stop("r_by_c must have at least one row and one column", call. = FALSE)
+  }
   ## require cell names provided
   if (is.null(colnames(r_by_c))) {
-    stop("the peak by cell matrix has to have column names")
+    stop("r_by_c must have cell names as column names", call. = FALSE)
+  }
+  if (anyNA(colnames(r_by_c)) || any(!nzchar(colnames(r_by_c))) ||
+      anyDuplicated(colnames(r_by_c))) {
+    stop("r_by_c column names must be unique and non-missing", call. = FALSE)
+  }
+  if (length(cell_type_labels) != ncol(r_by_c) || anyNA(cell_type_labels)) {
+    stop("cell_type_labels must contain one non-missing label per cell",
+      call. = FALSE
+    )
+  }
+  cell_type_labels <- as.character(cell_type_labels)
+  cell_type_set <- as.character(cell_type_set)
+  if (length(cell_type_set) == 0L || anyNA(cell_type_set) ||
+      any(!nzchar(cell_type_set)) || anyDuplicated(cell_type_set)) {
+    stop("cell_type_set must contain unique, non-missing labels", call. = FALSE)
+  }
+  if (!setequal(cell_type_set, unique(cell_type_labels))) {
+    stop("cell_type_set must match the labels present in cell_type_labels",
+      call. = FALSE
+    )
+  }
+  if (length(n_features_per_cell) != 1L ||
+      n_features_per_cell != nrow(r_by_c)) {
+    stop("n_features_per_cell must equal nrow(r_by_c)", call. = FALSE)
+  }
+  if (length(p_acc) != 1L || !is.finite(p_acc) || p_acc <= 0 ||
+      length(q_acc) != 1L || !is.finite(q_acc) || q_acc <= 0) {
+    stop("p_acc and q_acc must be positive finite scalars", call. = FALSE)
+  }
+  if (length(n_max_iter) != 1L || !is.finite(n_max_iter) ||
+      n_max_iter < 2L || n_max_iter != as.integer(n_max_iter)) {
+    stop("n_max_iter must be an integer of at least 2", call. = FALSE)
+  }
+  if (!is.logical(verbose) || length(verbose) != 1L || is.na(verbose)) {
+    stop("verbose must be TRUE or FALSE", call. = FALSE)
+  }
+  if (anyNA(r_by_c) || any(!is.finite(r_by_c)) || any(r_by_c < 0)) {
+    stop("r_by_c must contain finite, non-negative values", call. = FALSE)
   }
 
   ## save data to matrix
-  itermat_q_by_type <- vector(length = dim(r_by_c)[2])
+  itermat_q_by_type <- numeric(ncol(r_by_c))
   names(itermat_q_by_type) <- colnames(r_by_c)
   itermat_p_by_type <- matrix(
     nrow = n_features_per_cell,
-    ncol = length(cell_type_set)
+    ncol = length(cell_type_set),
+    dimnames = list(rownames(r_by_c), cell_type_set)
   )
-  colnames(itermat_p_by_type) <- cell_type_set
-
-  p_by_t_new <- matrix(nrow = n_features_per_cell, ncol = length(cell_type_set))
-  colnames(p_by_t_new) <- cell_type_set
-
 
   ## make the matrix binary
-  if (!is(r_by_c, "sparseMatrix")) {
-    as(r_by_c, "sparseMatrix")
-  }
-  r_by_c@x <- rep(r_by_c@x, length = length(r_by_c@x))
+  r_by_c <- Matrix::Matrix(r_by_c, sparse = TRUE)
+  r_by_c <- methods::as(r_by_c, "dMatrix")
+  r_by_c <- Matrix::drop0(r_by_c)
+  r_by_c@x[] <- 1
 
   ## for each cell type
   for (gg in cell_type_set) {
-    r_by_c_sub <- r_by_c[, cell_type_labels == gg]
-    n_cell_sub <- dim(r_by_c_sub)[2]
+    r_by_c_sub <- r_by_c[, cell_type_labels == gg, drop = FALSE]
+    n_cell_sub <- ncol(r_by_c_sub)
     cell_names_sub <- colnames(r_by_c_sub)
-    n_reads_in_cell <- colSums(r_by_c_sub)
-    n_reads_in_region <- rowSums(r_by_c_sub)
+    n_reads_in_cell <- Matrix::colSums(r_by_c_sub)
+    n_reads_in_region <- Matrix::rowSums(r_by_c_sub)
 
-    ## without the true missing rate information
-    itermat_q <- matrix(NA, nrow = n_max_iter, ncol = n_cell_sub)
-    itermat_p <- matrix(NA, nrow = n_features_per_cell, ncol = n_max_iter)
-
-    itermat_q[1, ] <- n_reads_in_cell / max(n_reads_in_cell) # starting for q
-    itermat_p[, 1] <- n_reads_in_region / n_cell_sub # starting value for p
-    diff1 <- 1
-    diff2 <- 1
-    numiters <- 1
-
-    while ((diff1 > p_acc || diff2 > q_acc) && numiters < n_max_iter) {
-      q0 <- itermat_q[numiters, ]
-      p0 <- itermat_p[, numiters]
-
-      ## First step -- estimate the missing rate from the open probabilities
-      q0new <- n_reads_in_cell / sum(p0)
-      q0new[q0new > 1] <- 0.999 ## make sure it does not exceed 1
-
-      ## Second step
-      p0new <- n_reads_in_region / sum(q0)
-      p0new[p0new > 1] <- 0.999 ## make sure it does not exceed 1
-
-      ## record the values
-      numiters <- numiters + 1
-      itermat_p[, numiters] <- p0new
-      itermat_q[numiters, ] <- q0new
-
-      diff1 <- sum(abs(itermat_p[, numiters] - itermat_p[, numiters - 1]) /
-                     abs(itermat_p[, numiters]), na.rm = TRUE) /
-        n_features_per_cell
-      diff2 <- sum(abs(itermat_q[numiters, ] - itermat_q[numiters - 1, ]) /
-                     abs(itermat_q[numiters, ]), na.rm = TRUE) / n_cell_sub
+    max_reads <- max(n_reads_in_cell)
+    if (max_reads == 0) {
+      stop(
+        "Capturing rates cannot be estimated for cell type '", gg,
+        "' because all of its cells have zero accessible peaks",
+        call. = FALSE
+      )
     }
 
-    ## remove columns that contain na values
-    mat_to_shrink <- itermat_p
-    mat_to_shrink <- mat_to_shrink[, !is.na(colSums(mat_to_shrink))]
-    itermat_p_by_type[, gg] <- mat_to_shrink[, dim(mat_to_shrink)[2]]
+    ## Starting values without known missing-rate information.
+    q_current <- n_reads_in_cell / max_reads
+    p_current <- n_reads_in_region / n_cell_sub
+    diff1 <- Inf
+    diff2 <- Inf
+    converged <- FALSE
 
-    mat_to_shrink2 <- itermat_q
-    mat_to_shrink2 <- mat_to_shrink2[!is.na(rowSums(mat_to_shrink2)), ]
-    itermat_q_by_type[cell_names_sub] <- mat_to_shrink2[dim(mat_to_shrink2)[1],]
+    for (numiters in seq_len(n_max_iter - 1L)) {
+      sum_p <- sum(p_current)
+      sum_q <- sum(q_current)
+      if (sum_p <= 0 || sum_q <= 0) {
+        stop("The p/q iteration encountered a zero denominator", call. = FALSE)
+      }
+
+      ## First step -- estimate the missing rate from the open probabilities
+      q_new <- pmin(n_reads_in_cell / sum_p, 0.999)
+
+      ## Second step
+      p_new <- pmin(n_reads_in_region / sum_q, 0.999)
+
+      ## Use a stable relative change calculation for zero-valued entries.
+      diff1 <- mean(
+        abs(p_new - p_current) / pmax(abs(p_new), .Machine$double.eps)
+      )
+      diff2 <- mean(
+        abs(q_new - q_current) / pmax(abs(q_new), .Machine$double.eps)
+      )
+      p_current <- p_new
+      q_current <- q_new
+
+      if (diff1 <= p_acc && diff2 <= q_acc) {
+        converged <- TRUE
+        break
+      }
+    }
+
+    itermat_p_by_type[, gg] <- p_current
+    itermat_q_by_type[cell_names_sub] <- q_current
+
+    if (!converged) {
+      warning(
+        "p/q estimation for cell type '", gg,
+        "' did not converge within ", n_max_iter, " iterations",
+        call. = FALSE
+      )
+    }
 
     ## print progress
     if (verbose) {
-      print(paste(gg, " completed"))
-      print(paste("diff1 = ", diff1))
-      print(paste("diff2 = ", diff2))
+      message(sprintf(
+        "%s completed (p change = %.6g; q change = %.6g)",
+        gg, diff1, diff2
+      ))
     }
   }
-  return(list(p_by_t = itermat_p_by_type, q_vec = itermat_q_by_type))
+  list(p_by_t = itermat_p_by_type, q_vec = itermat_q_by_type)
 }

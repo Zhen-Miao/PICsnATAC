@@ -3,5 +3,9 @@
 .RData
 .Ruserdata
 .DS_Store
+*.arrow
+*.heic
+vignettes/*.html
+/tmp/
 vignettes/.DS_Store
 docs

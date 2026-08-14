@@ -4,6 +4,7 @@
 # PICsnATAC
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/Zhen-Miao/PICsnATAC/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Zhen-Miao/PICsnATAC/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of PICsnATAC is to accurately quantify snATAC-seq data. The two
@@ -76,8 +77,20 @@ by peak matrix:
 ``` r
 library(PICsnATAC)
 
-pic_matrix <- PIC_counting(cells, fragment_tsv_gz_file_location, peak_sets)
+pic_matrix <- PIC_counting(
+  cells = cells,
+  fragment_tsv_gz_file_location = fragment_tsv_gz_file_location,
+  peak_sets = peak_sets
+)
 ```
+
+`DAR_by_LRT()` treats counts strictly greater than its configurable
+`artifact_threshold` (default: 10) as unreliable and replaces them with
+zero before capping the remaining counts at the model-supported value of
+5. The threshold is a heuristic for possible mapping errors or unusual
+fragment structures; use `artifact_threshold = Inf` to disable it and
+consider a sensitivity analysis when high counts are common in your
+assay.
 
 ## Vignettes
 
@@ -105,3 +118,4 @@ If you use PICsnATAC in your research, please cite our paper:
 Miao Z, and Kim J. *Uniform quantification of single-nucleus ATAC-seq
 data with Paired-Insertion Counting (PIC) and a model-based insertion
 rate estimator.* *Nature Methods* 21.1 (2024): 32-36.
+[doi:10.1038/s41592-023-02103-7](https://doi.org/10.1038/s41592-023-02103-7).
