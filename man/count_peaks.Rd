@@ -4,7 +4,12 @@
 \alias{count_peaks}
 \title{Count number of paired insertions in each peak}
 \usage{
-count_peaks(peak_sets, filtered_fragments, extend_size, n_features)
+count_peaks(
+  peak_sets,
+  filtered_fragments,
+  extend_size,
+  n_features = length(peak_sets)
+)
 }
 \arguments{
 \item{peak_sets}{GRanges object of peak sets}

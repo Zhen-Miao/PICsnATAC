@@ -1,6 +1,6 @@
 Package: PICsnATAC
-Title: PICsnATAC: Paired Insertion Counting for snATAC-seq data
-Version: 0.3.1
+Title: Paired Insertion Counting for Single-Nucleus ATAC-Seq Data
+Version: 0.3.2
 Authors@R: c(
            person("Zhen", "Miao", , "zhenmiao@pennmedicine.upenn.edu",
              role = c("aut", "cre"),
@@ -9,9 +9,13 @@ Authors@R: c(
            person("Junhyong", "Kim",, role = c("aut"), 
              comment = c(ORCID = "0000-0002-7726-8246")
              ))
-Description: A package for Paired Insertion Counting for snATAC-seq data.
+Description: Implements Paired Insertion Counting (PIC) for consistent
+    quantification of single-nucleus assay for transposase-accessible chromatin
+    sequencing data. It also provides model-based insertion-rate estimation and
+    likelihood-ratio testing for differential accessibility, as described in
+    Miao and Kim (2024) <doi:10.1038/s41592-023-02103-7>.
 Depends: 
-    R (>= 3.4.0)
+    R (>= 4.1.0)
 Imports: 
     methods,
     Matrix,
@@ -23,13 +27,18 @@ Imports:
     IRanges,
     GenomicRanges,
     Rsamtools,
-    tidyr,
+    R.utils,
+    stats,
     progress
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-URL: https://zhen-miao.github.io/PICsnATAC/
+URL: https://github.com/Zhen-Miao/PICsnATAC,
+    https://zhen-miao.github.io/PICsnATAC/
+BugReports: https://github.com/Zhen-Miao/PICsnATAC/issues
+biocViews: Software, Sequencing, ATACSeq, SingleCell,
+    DifferentialExpression

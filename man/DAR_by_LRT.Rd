@@ -8,11 +8,12 @@ DAR_by_LRT(
   pic_mat,
   capturing_rates,
   cell_type_labels,
-  n_cores = 1,
+  n_cores = 1L,
   plen = NULL,
   min_frag_length = 25,
   max_frag_length = 600,
-  estimation_approach = "MLE"
+  estimation_approach = "MLE",
+  artifact_threshold = 10L
 )
 }
 \arguments{
@@ -22,8 +23,8 @@ DAR_by_LRT(
 
 \item{cell_type_labels}{A vector specifying cell type labels}
 
-\item{n_cores}{A numerical value to specify the number of cores in parallel,
-default = 1}
+\item{n_cores}{A positive integer specifying the number of cores. On Windows,
+values greater than one fall back to serial evaluation. Default = 1.}
 
 \item{plen}{A vector of peak length}
 
@@ -41,9 +42,18 @@ for condition 1 or 'ME' for condition 1+2.
 The 'MLE' approach is more accurate
 and usually it has a higher power, but it ignores the size filtering step
 in snATAC-seq data generation. Default is 'MLE'}
+
+\item{artifact_threshold}{A heuristic upper threshold for unreliable counts.
+Counts strictly greater than this value may reflect mapping errors or
+unusual fragment structures and are replaced by zero before the remaining
+counts are capped at 5 for the likelihood model. The default is 10; use
+\code{Inf} to disable artifact replacement. Because this cutoff is assay- and
+pipeline-dependent, sensitivity analyses with alternative values are
+recommended.}
 }
 \value{
-Log loss value
+A numeric vector containing one likelihood-ratio-test p-value per
+peak, named from \code{rownames(pic_mat)} when available.
 }
 \description{
 Compute p value for DAR test between two cell types

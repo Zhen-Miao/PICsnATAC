@@ -2,9 +2,9 @@
 % Please edit documentation in R/Insertion_rates_and_DAR_test.R
 \name{obs_to_insertion_MLE_obj}
 \alias{obs_to_insertion_MLE_obj}
-\title{Calculate the optimal loss from observed PIC counts}
+\title{Calculate maximized log-likelihoods from observed PIC counts}
 \usage{
-obs_to_insertion_MLE_obj(pic_mat, capturing_rates, plen, n_cores)
+obs_to_insertion_MLE_obj(pic_mat, capturing_rates, plen, n_cores = 1L)
 }
 \arguments{
 \item{pic_mat}{The observed peak by cell PIC count matrix}
@@ -13,11 +13,13 @@ obs_to_insertion_MLE_obj(pic_mat, capturing_rates, plen, n_cores)
 
 \item{plen}{A vector of peak widths}
 
-\item{n_cores}{A numerical value to specify the number of cores in parallel}
+\item{n_cores}{A positive integer specifying the number of cores. On Windows,
+values greater than one fall back to serial evaluation.}
 }
 \value{
-The optimized loss over insertion rates from 0.01 to 20
+A numeric vector containing the maximized log-likelihood for each
+peak over insertion rates from 0.01 to 20.
 }
 \description{
-Calculate the optimal loss from observed PIC counts
+Calculate maximized log-likelihoods from observed PIC counts
 }

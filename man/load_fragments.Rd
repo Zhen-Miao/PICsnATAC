@@ -11,12 +11,12 @@ load_fragments(fragment_tsv_gz_file_location, cells, verbose = TRUE)
 fragment.tsv.gz file location. This can usually be found at the /out
 directory from Cell Ranger output}
 
-\item{cells}{The cell barcode lables as a Character vector}
+\item{cells}{Cell barcode labels as a character vector.}
 
 \item{verbose}{Whether to output progress message. Default TRUE}
 }
 \value{
-data.frame containing fragments that are filtered by cell barcodes
+A data frame containing fragments filtered by cell barcode.
 }
 \description{
 Function for loading fragment files and filter by cell barcodes

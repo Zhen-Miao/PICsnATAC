@@ -4,23 +4,23 @@
     "Repositories": [
       {
         "Name": "BioCsoft",
-        "URL": "https://bioconductor.org/packages/3.12/bioc"
+        "URL": "https://bioconductor.org/packages/3.16/bioc"
       },
       {
         "Name": "BioCann",
-        "URL": "https://bioconductor.org/packages/3.12/data/annotation"
+        "URL": "https://bioconductor.org/packages/3.16/data/annotation"
       },
       {
         "Name": "BioCexp",
-        "URL": "https://bioconductor.org/packages/3.12/data/experiment"
+        "URL": "https://bioconductor.org/packages/3.16/data/experiment"
       },
       {
         "Name": "BioCworkflows",
-        "URL": "https://bioconductor.org/packages/3.12/workflows"
+        "URL": "https://bioconductor.org/packages/3.16/workflows"
       },
       {
         "Name": "BioCbooks",
-        "URL": "https://bioconductor.org/packages/3.12/books"
+        "URL": "https://bioconductor.org/packages/3.16/books"
       },
       {
         "Name": "CRAN",
@@ -29,7 +29,7 @@
     ]
   },
   "Bioconductor": {
-    "Version": "3.12"
+    "Version": "3.16"
   },
   "Packages": {
     "BH": {
@@ -185,6 +185,21 @@
         "utils"
       ],
       "Hash": "1d1b6901cf9b6b1b446bc56a7d47efa4"
+    },
+    "R.methodsS3": {
+      "Package": "R.methodsS3",
+      "Version": "1.8.2",
+      "Source": "Repository"
+    },
+    "R.oo": {
+      "Package": "R.oo",
+      "Version": "1.27.1",
+      "Source": "Repository"
+    },
+    "R.utils": {
+      "Package": "R.utils",
+      "Version": "2.13.0",
+      "Source": "Repository"
     },
     "R6": {
       "Package": "R6",

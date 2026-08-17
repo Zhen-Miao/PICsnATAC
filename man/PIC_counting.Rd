@@ -15,7 +15,7 @@ PIC_counting(
 )
 }
 \arguments{
-\item{cells}{The cell barcode lables as a Character vector}
+\item{cells}{Cell barcode labels as a character vector.}
 
 \item{fragment_tsv_gz_file_location}{The 10X Cell Ranger output
 fragment.tsv.gz file location. This can usually be found at the /out
@@ -28,22 +28,23 @@ and the function will convert it into a GenomicRanges object}
 \item{deduplicate}{Whether to include deduplicate step where within
 the same cell,
 fragments with identical start and end location will be deduplicated.
-This is usually unnecessisary from Cell Ranger ATAC output, since
+This is usually unnecessary for Cell Ranger ATAC output, since
 Cell Ranger ATAC has already deduplicated the fragments.
 But for dsc-ATAC-seq data, this step will
 be helpful and recommended.}
 
 \item{load_full}{Whether to load the whole fragment.tsv.gz file into memory.
-If set to FALSE, the function will load it dynamically to save RAM}
+If set to \code{FALSE}, the function loads it by chromosome to save RAM. This
+mode requires a block-gzipped file and its Tabix index (\code{.tbi}).}
 
 \item{extend_size}{How long should we extend the exact insertion site as
-accessible window}
+an accessible window, in base pairs.}
 
 \item{verbose}{Whether to output progress information including the progress
 bar}
 }
 \value{
-The peak by cell PIC count matrix
+A sparse peak-by-cell PIC count matrix.
 }
 \description{
 Count snATAC-seq data matrix with Paired Insertion Counting (PIC)

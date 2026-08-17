@@ -20,7 +20,7 @@ obs_to_insertion_ME(
 
 \item{capturing_rates}{A vector of estimated capturing rates for each cell}
 
-\item{cell_type_labels}{A vector of cell type lables for each cell}
+\item{cell_type_labels}{A vector of cell type labels for each cell}
 
 \item{cap_insertion}{The maximum number of insertions in a peak region.}
 

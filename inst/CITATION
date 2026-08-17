@@ -6,9 +6,9 @@ bibentry(
   title    = "Uniform quantification of single-nucleus ATAC-seq data with Paired- Insertion Counting (PIC) and a model-based insertion rate estimator",
   author   = "Miao, Zhen and Kim, Junhyong",
   journal  = "Nature Methods",
-  year     = "2023",
-  volume   = "in press",
-  number   = "",
-  pages    = "",
-  doi      = "10.1101/2022.04.20.488960"
+  year     = "2024",
+  volume   = "21",
+  number   = "1",
+  pages    = "32--36",
+  doi      = "10.1038/s41592-023-02103-7"
 )
