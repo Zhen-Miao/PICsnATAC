@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>PICsnATAC: Paired Insertion Counting for snATAC-seq data • PICsnATAC</title>
+<title>Paired Insertion Counting for Single-Nucleus ATAC-Seq Data • PICsnATAC</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="PICsnATAC: Paired Insertion Counting for snATAC-seq data">
-<meta name="description" content="A package for Paired Insertion Counting for snATAC-seq data.">
-<meta property="og:description" content="A package for Paired Insertion Counting for snATAC-seq data.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Paired Insertion Counting for Single-Nucleus ATAC-Seq Data">
+<meta name="description" content="Implements Paired Insertion Counting (PIC) for consistent quantification of single-nucleus assay for transposase-accessible chromatin sequencing data. It also provides model-based insertion-rate estimation and likelihood-ratio testing for differential accessibility, as described in Miao and Kim (2024) &lt;doi:10.1038/s41592-023-02103-7&gt;.">
+<meta property="og:description" content="Implements Paired Insertion Counting (PIC) for consistent quantification of single-nucleus assay for transposase-accessible chromatin sequencing data. It also provides model-based insertion-rate estimation and likelihood-ratio testing for differential accessibility, as described in Miao and Kim (2024) &lt;doi:10.1038/s41592-023-02103-7&gt;.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">PICsnATAC</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,11 +42,13 @@
     <li><a class="dropdown-item" href="articles/vignette-5----DAR-analysis-with-PIC-parametric-framework.html">Vignette 5 -- DAR analysis with PIC parametric framework</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="search.json">
 </form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/Zhen-Miao/PICsnATAC/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -58,7 +60,7 @@
 <div class="page-header"><h1 id="picsnatac">PICsnATAC<a class="anchor" aria-label="anchor" href="#picsnatac"></a>
 </h1></div>
 <!-- badges: start -->
-<!-- badges: end -->
+
 <p>The goal of PICsnATAC is to accurately quantify snATAC-seq data. The two key components are:</p>
 <div class="section level4">
 <h4 id="id_1-constructing-cell-by-peak-matrix-with-paired-insertion-counting-pic">1. <span style="text-decoration:underline">Constructing cell-by-peak matrix</span> with Paired Insertion Counting (PIC).<a class="anchor" aria-label="anchor" href="#id_1-constructing-cell-by-peak-matrix-with-paired-insertion-counting-pic"></a>
@@ -94,7 +96,7 @@
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'data.table'</span><span class="op">)</span> <span class="co">## (please make sure it is newer than 1.8)</span></span>
 <span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://bioconductor.github.io/BiocManager/" class="external-link">"BiocManager"</a></span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
-<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'IRanges'</span>, <span class="st">'GenomicRanges'</span>,<span class="st">'Rsamtools'</span>, <span class="st">'GenomeInfoDb'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu">install</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'IRanges'</span>, <span class="st">'GenomicRanges'</span>,<span class="st">'Rsamtools'</span>, <span class="st">'GenomeInfoDb'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -102,7 +104,7 @@
 <p>You can install the most up-to-date version of PICsnATAC from <a href="https://github.com/Zhen-Miao/PICsnATAC" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"Zhen-Miao/PICsnATAC"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"Zhen-Miao/PICsnATAC"</span><span class="op">)</span></span></code></pre></div>
 <p>PIC-snATAC is a light-weight package. Installation typically takes &lt;5 min.</p>
 </div>
 <div class="section level2">
@@ -110,9 +112,14 @@
 </h2>
 <p>This is a basic example which shows you how to construct PIC-based cell by peak matrix:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://zhen-miao.github.io/PICsnATAC/">PICsnATAC</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/Zhen-Miao/PICsnATAC" class="external-link">PICsnATAC</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">pic_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/PIC_counting.html">PIC_counting</a></span><span class="op">(</span><span class="va">cells</span>, <span class="va">fragment_tsv_gz_file_location</span>, <span class="va">peak_sets</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">pic_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/PIC_counting.html">PIC_counting</a></span><span class="op">(</span></span>
+<span>  cells <span class="op">=</span> <span class="va">cells</span>,</span>
+<span>  fragment_tsv_gz_file_location <span class="op">=</span> <span class="va">fragment_tsv_gz_file_location</span>,</span>
+<span>  peak_sets <span class="op">=</span> <span class="va">peak_sets</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><code><a href="reference/DAR_by_LRT.html">DAR_by_LRT()</a></code> treats counts strictly greater than its configurable <code>artifact_threshold</code> (default: 10) as unreliable and replaces them with zero before capping the remaining counts at the model-supported value of 5. The threshold is a heuristic for possible mapping errors or unusual fragment structures; use <code>artifact_threshold = Inf</code> to disable it and consider a sensitivity analysis when high counts are common in your assay.</p>
 </div>
 <div class="section level2">
 <h2 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a>
@@ -131,10 +138,18 @@
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <p>If you use PICsnATAC in your research, please cite our paper:</p>
-<p>Miao Z, and Kim J. <em>Uniform quantification of single-nucleus ATAC-seq data with Paired-Insertion Counting (PIC) and a model-based insertion rate estimator.</em> <em>Nature Methods</em> 21.1 (2024): 32-36.</p>
+<p>Miao Z, and Kim J. <em>Uniform quantification of single-nucleus ATAC-seq data with Paired-Insertion Counting (PIC) and a model-based insertion rate estimator.</em> <em>Nature Methods</em> 21.1 (2024): 32-36. <a href="https://doi.org/10.1038/s41592-023-02103-7" class="external-link">doi:10.1038/s41592-023-02103-7</a>.</p>
 </div>
 </div>
-  </main><aside class="col-md-3"><div class="license">
+  </main><aside class="col-md-3"><div class="links">
+<h2 data-toc-skip>Links</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/Zhen-Miao/PICsnATAC/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/Zhen-Miao/PICsnATAC/issues" class="external-link">Report a bug</a></li>
+</ul>
+</div>
+
+<div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li><a href="LICENSE.html">Full license</a></li>
@@ -158,7 +173,12 @@
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/Zhen-Miao/PICsnATAC/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/Zhen-Miao/PICsnATAC/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>
@@ -169,7 +189,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

@@ -5,7 +5,12 @@ Count number of paired insertions in each peak
 ## Usage
 
 ``` r
-count_peaks(peak_sets, filtered_fragments, extend_size, n_features)
+count_peaks(
+  peak_sets,
+  filtered_fragments,
+  extend_size,
+  n_features = length(peak_sets)
+)
 ```
 
 ## Arguments

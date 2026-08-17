@@ -20,7 +20,7 @@ PIC_counting(
 
 - cells:
 
-  The cell barcode lables as a Character vector
+  Cell barcode labels as a character vector.
 
 - fragment_tsv_gz_file_location:
 
@@ -37,19 +37,20 @@ PIC_counting(
 
   Whether to include deduplicate step where within the same cell,
   fragments with identical start and end location will be deduplicated.
-  This is usually unnecessisary from Cell Ranger ATAC output, since Cell
+  This is usually unnecessary for Cell Ranger ATAC output, since Cell
   Ranger ATAC has already deduplicated the fragments. But for
   dsc-ATAC-seq data, this step will be helpful and recommended.
 
 - load_full:
 
   Whether to load the whole fragment.tsv.gz file into memory. If set to
-  FALSE, the function will load it dynamically to save RAM
+  `FALSE`, the function loads it by chromosome to save RAM. This mode
+  requires a block-gzipped file and its Tabix index (`.tbi`).
 
 - extend_size:
 
-  How long should we extend the exact insertion site as accessible
-  window
+  How long should we extend the exact insertion site as an accessible
+  window, in base pairs.
 
 - verbose:
 
@@ -57,4 +58,4 @@ PIC_counting(
 
 ## Value
 
-The peak by cell PIC count matrix
+A sparse peak-by-cell PIC count matrix.

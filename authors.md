@@ -9,16 +9,22 @@
 
 ## Citation
 
-Miao, Zhen, Kim, Junhyong (2023). “Uniform quantification of
+Source:
+[`inst/CITATION`](https://github.com/Zhen-Miao/PICsnATAC/blob/main/inst/CITATION)
+
+Miao, Zhen, Kim, Junhyong (2024). “Uniform quantification of
 single-nucleus ATAC-seq data with Paired- Insertion Counting (PIC) and a
-model-based insertion rate estimator.” *Nature Methods*, **in press**.
-[doi:10.1101/2022.04.20.488960](https://doi.org/10.1101/2022.04.20.488960).
+model-based insertion rate estimator.” *Nature Methods*, **21**(1),
+32–36.
+[doi:10.1038/s41592-023-02103-7](https://doi.org/10.1038/s41592-023-02103-7).
 
     @Article{,
       title = {Uniform quantification of single-nucleus ATAC-seq data with Paired- Insertion Counting (PIC) and a model-based insertion rate estimator},
       author = {{Miao} and {Zhen} and {Kim} and {Junhyong}},
       journal = {Nature Methods},
-      year = {2023},
-      volume = {in press},
-      doi = {10.1101/2022.04.20.488960},
+      year = {2024},
+      volume = {21},
+      number = {1},
+      pages = {32--36},
+      doi = {10.1038/s41592-023-02103-7},
     }

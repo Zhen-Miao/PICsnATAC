@@ -11,6 +11,7 @@ Please make sure the following libraries are installed and loaded for
 the analysis.
 
 ``` r
+
 library("data.table")
 library("GenomicRanges")
 library("Matrix")
@@ -42,6 +43,7 @@ additional information of Signac workflow
 If we want to keep the cells from Cell Ranger filtering scheme:
 
 ``` r
+
 meta.data <- read.csv("atac_pbmc_5k_nextgem_singlecell.csv", header = TRUE)
 # -- in your own Cell Ranger output, the file name will be 'singlecell.csv'
 meta.data_filtered <- meta.data[meta.data$is__cell_barcode == 1, ]
@@ -53,6 +55,7 @@ cells <- meta.data_filtered$barcode
 If we want to keep the set of peaks from Cell Ranger:
 
 ``` r
+
 peaks <- data.table::fread("atac_pbmc_5k_nextgem_peaks.bed", header = FALSE)
 # -- in your own Cell Ranger output, the file name will be 'peaks.bed'
 colnames(peaks) <- c("seqname", "start", "end")
@@ -65,6 +68,7 @@ file name
 ## Run PIC and save output
 
 ``` r
+
 fragment_tsv_gz_file_location <- "atac_pbmc_5k_nextgem_fragments.tsv.gz"
 pic_mat <- PIC_counting(
   cells = cells,
@@ -81,6 +85,7 @@ different file names
 ## Create Seurat Object with PIC output
 
 ``` r
+
 counts <- readRDS("PIC_mat_1.rds")
 
 chrom_assay <- CreateChromatinAssay(

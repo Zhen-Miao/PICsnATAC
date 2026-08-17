@@ -14,6 +14,7 @@ Please make sure the following libraries are installed and loaded for
 the analysis.
 
 ``` r
+
 library("data.table")
 library("GenomicRanges")
 library("Matrix")
@@ -42,6 +43,7 @@ Please make sure to download the following files for PIC counting:
 If we want to keep the cells from the publications:
 
 ``` r
+
 cm <- read.table("GSE123576_mousebrain_cellData_revision.tsv",
   sep = "\t", header = TRUE
 )
@@ -58,6 +60,7 @@ cells <- cmtsample$DropBarcode
 If we want to keep the set of peaks from the publication:
 
 ``` r
+
 feature_df <- read.csv("GSE123576_mousebrain_peaks_revision.bed",
   sep = "\t", header = FALSE
 )
@@ -74,6 +77,7 @@ provided in GEO has already been de-duplicated, we still recommend doing
 so for all dsc-ATAC-seq data.
 
 ``` r
+
 fragment_tsv_gz_file_location <- "GSM3507349_Mouse2-Channel1.fragments.tsv.gz"
 pic_mat <- PIC_counting(
   cells = cells,

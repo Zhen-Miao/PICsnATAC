@@ -1,11 +1,11 @@
-# Calculate insertion rate from observed PIC counts
+# Calculate insertion rates from observed PIC counts
 
-Calculate insertion rate from observed PIC counts
+Calculate insertion rates from observed PIC counts
 
 ## Usage
 
 ``` r
-obs_to_insertion_MLE_lam(pic_mat, capturing_rates, plen, n_cores)
+obs_to_insertion_MLE_lam(pic_mat, capturing_rates, plen, n_cores = 1L)
 ```
 
 ## Arguments
@@ -24,7 +24,8 @@ obs_to_insertion_MLE_lam(pic_mat, capturing_rates, plen, n_cores)
 
 - n_cores:
 
-  A numerical value to specify the number of cores in parallel
+  A positive integer specifying the number of cores. On Windows, values
+  greater than one fall back to serial evaluation.
 
 ## Value
 

@@ -11,6 +11,7 @@ Please make sure the following libraries are installed and loaded for
 the analysis.
 
 ``` r
+
 library("data.table")
 library("GenomicRanges")
 library("Matrix")
@@ -35,6 +36,7 @@ Below are the step-by-step instructions for obtaining these input from
 If we want to keep the cells from Cell Ranger filtering scheme:
 
 ``` r
+
 meta.data <- read.csv("atac_pbmc_5k_nextgem_singlecell.csv", header = TRUE)
 # -- Note, in your own Cell Ranger output, the file name will be 'singlecell.csv'
 meta.data_filtered <- meta.data[meta.data$is__cell_barcode == 1, ]
@@ -50,6 +52,7 @@ enrichment, etc.
 If we want to keep the set of peaks from Cell Ranger:
 
 ``` r
+
 peaks <- data.table::fread("atac_pbmc_5k_nextgem_peaks.bed", header = FALSE)
 # -- in your own Cell Ranger output, the file name will be 'peaks.bed'
 colnames(peaks) <- c("seqname", "start", "end")
@@ -66,6 +69,7 @@ MACS2-called peaks, just change the file name accordingly.
 ### Load the whole file (memory heavy)
 
 ``` r
+
 fragment_tsv_gz_file_location <- "atac_pbmc_5k_nextgem_fragments.tsv.gz"
 pic_mat <- PIC_counting(
   cells = cells,
@@ -86,6 +90,7 @@ dynamically. This is simple with PIC_counting, we just need to specify
 chromosome separately.
 
 ``` r
+
 fragment_tsv_gz_file_location <- "atac_pbmc_5k_nextgem_fragments.tsv.gz"
 pic_mat <- PIC_counting(
   cells = cells,

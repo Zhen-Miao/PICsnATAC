@@ -10,6 +10,7 @@ Please make sure the following libraries are installed and loaded for
 the analysis.
 
 ``` r
+
 library("data.table")
 library("GenomicRanges")
 library("Matrix")
@@ -33,6 +34,7 @@ Please make sure to download the tutorial dataset by running
 Here we used ArchR example dataset as
 
 ``` r
+
 inputFiles <- getTutorialData("Hematopoiesis")
 # inputFiles
 addArchRGenome("hg19")
@@ -53,6 +55,7 @@ and please make sure you understand the process of doublet inferrence
 before executing this part
 
 ``` r
+
 doubScores <- addDoubletScores(
   input = ArrowFiles,
   k = 10, # Refers to how many cells near a "pseudo-doublet" to count.
@@ -64,6 +67,7 @@ doubScores <- addDoubletScores(
 ## Create an ArchRproject
 
 ``` r
+
 proj <- ArchRProject(
   ArrowFiles = ArrowFiles,
   outputDirectory = "HemeTutorial",
@@ -78,6 +82,7 @@ By default, ArchR will do peak calling with MACS2 for each cluster, so
 we will need to run the following functions to generate clusters.
 
 ``` r
+
 proj <- addIterativeLSI(ArchRProj = proj, useMatrix = "TileMatrix",
                         name = "IterativeLSI")
 proj <- addClusters(input = proj, reducedDims = "IterativeLSI")
@@ -91,6 +96,7 @@ supports other peak calling methods, please refer to ArchR manual for
 additional options.
 
 ``` r
+
 pathToMacs2 <- findMacs2()
 proj <- addReproduciblePeakSet(
   ArchRProj = proj,
@@ -104,6 +110,7 @@ Here, we have three samples, we compute the PIC matrix for each of them
 separately. Then, they will be loaded to each of the samples.
 
 ``` r
+
 pic_mat <- rep(list(), length = length(inputFiles))
 for (s in seq_along(inputFiles)) {
   ## select one sample
@@ -144,6 +151,7 @@ Below, we provide example codes for each setting. \## Overwrite original
 PeakMatrix
 
 ``` r
+
 ## first, save the data.frame
 pks <- proj@peakSet
 names(pks) <- NULL
@@ -171,6 +179,7 @@ for (s in seq_along(inputFiles)) {
 ### Create another data slot called “PIC”
 
 ``` r
+
 ## first, save the data.frame
 pks <- proj@peakSet
 names(pks) <- NULL
@@ -201,12 +210,14 @@ The function below will display available cell-by-feature matrices you
 have.
 
 ``` r
+
 getAvailableMatrices(proj)
 ```
 
 ## Save and load ArchRProject
 
 ``` r
+
 ## to save object
 proj <- saveArchRProject(ArchRProj = proj)
 

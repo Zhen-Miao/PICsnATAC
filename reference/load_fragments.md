@@ -17,7 +17,7 @@ load_fragments(fragment_tsv_gz_file_location, cells, verbose = TRUE)
 
 - cells:
 
-  The cell barcode lables as a Character vector
+  Cell barcode labels as a character vector.
 
 - verbose:
 
@@ -25,4 +25,4 @@ load_fragments(fragment_tsv_gz_file_location, cells, verbose = TRUE)
 
 ## Value
 
-data.frame containing fragments that are filtered by cell barcodes
+A data frame containing fragments filtered by cell barcode.

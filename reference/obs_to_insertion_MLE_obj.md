@@ -1,11 +1,11 @@
-# Calculate the optimal loss from observed PIC counts
+# Calculate maximized log-likelihoods from observed PIC counts
 
-Calculate the optimal loss from observed PIC counts
+Calculate maximized log-likelihoods from observed PIC counts
 
 ## Usage
 
 ``` r
-obs_to_insertion_MLE_obj(pic_mat, capturing_rates, plen, n_cores)
+obs_to_insertion_MLE_obj(pic_mat, capturing_rates, plen, n_cores = 1L)
 ```
 
 ## Arguments
@@ -24,8 +24,10 @@ obs_to_insertion_MLE_obj(pic_mat, capturing_rates, plen, n_cores)
 
 - n_cores:
 
-  A numerical value to specify the number of cores in parallel
+  A positive integer specifying the number of cores. On Windows, values
+  greater than one fall back to serial evaluation.
 
 ## Value
 
-The optimized loss over insertion rates from 0.01 to 20
+A numeric vector containing the maximized log-likelihood for each peak
+over insertion rates from 0.01 to 20.

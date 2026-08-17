@@ -38,6 +38,7 @@ types).*
 Please install the dependent libraries by running the following codes
 
 ``` r
+
 install.packages('data.table') ## (please make sure it is newer than 1.8)
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
@@ -50,6 +51,7 @@ You can install the most up-to-date version of PICsnATAC from
 [GitHub](https://github.com/Zhen-Miao/PICsnATAC) with:
 
 ``` r
+
 # install.packages("devtools")
 devtools::install_github("Zhen-Miao/PICsnATAC")
 ```
@@ -63,10 +65,24 @@ This is a basic example which shows you how to construct PIC-based cell
 by peak matrix:
 
 ``` r
+
 library(PICsnATAC)
 
-pic_matrix <- PIC_counting(cells, fragment_tsv_gz_file_location, peak_sets)
+pic_matrix <- PIC_counting(
+  cells = cells,
+  fragment_tsv_gz_file_location = fragment_tsv_gz_file_location,
+  peak_sets = peak_sets
+)
 ```
+
+[`DAR_by_LRT()`](https://zhen-miao.github.io/PICsnATAC/reference/DAR_by_LRT.md)
+treats counts strictly greater than its configurable
+`artifact_threshold` (default: 10) as unreliable and replaces them with
+zero before capping the remaining counts at the model-supported value of
+5. The threshold is a heuristic for possible mapping errors or unusual
+fragment structures; use `artifact_threshold = Inf` to disable it and
+consider a sensitivity analysis when high counts are common in your
+assay.
 
 ## Vignettes
 
@@ -94,3 +110,4 @@ If you use PICsnATAC in your research, please cite our paper:
 Miao Z, and Kim J. *Uniform quantification of single-nucleus ATAC-seq
 data with Paired-Insertion Counting (PIC) and a model-based insertion
 rate estimator.* *Nature Methods* 21.1 (2024): 32-36.
+[doi:10.1038/s41592-023-02103-7](https://doi.org/10.1038/s41592-023-02103-7).

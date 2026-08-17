@@ -17,6 +17,6 @@
 - [`obs_to_insertion_ME()`](https://zhen-miao.github.io/PICsnATAC/reference/obs_to_insertion_ME.md)
   : Moment estimator for insertion rates from observed values
 - [`obs_to_insertion_MLE_lam()`](https://zhen-miao.github.io/PICsnATAC/reference/obs_to_insertion_MLE_lam.md)
-  : Calculate insertion rate from observed PIC counts
+  : Calculate insertion rates from observed PIC counts
 - [`obs_to_insertion_MLE_obj()`](https://zhen-miao.github.io/PICsnATAC/reference/obs_to_insertion_MLE_obj.md)
-  : Calculate the optimal loss from observed PIC counts
+  : Calculate maximized log-likelihoods from observed PIC counts

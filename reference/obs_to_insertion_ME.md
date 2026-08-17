@@ -29,7 +29,7 @@ obs_to_insertion_ME(
 
 - cell_type_labels:
 
-  A vector of cell type lables for each cell
+  A vector of cell type labels for each cell
 
 - cap_insertion:
 

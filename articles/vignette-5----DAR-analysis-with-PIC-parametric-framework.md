@@ -15,6 +15,7 @@ Please make sure the following libraries are installed and loaded for
 the analysis.
 
 ``` r
+
 library("data.table")
 library("GenomicRanges")
 library("Matrix")
@@ -40,6 +41,7 @@ will compute the caputuring rate in each cell while separating the
 effect of cell type-specific open probability
 
 ``` r
+
 r_by_ct_out <- get_r_by_ct_mat_pq(
   cell_type_set = unique(cell_types),
   r_by_c = pic_mat,
@@ -62,6 +64,7 @@ With the cell-specific caputuring rate, we can now execute our DAR test
 function
 
 ``` r
+
 p_vals <- DAR_by_LRT(pic_mat = pic_mat, capturing_rates = r_by_ct_out$q_vec, cell_type_labels = cell_types)
 ```
 
@@ -71,6 +74,7 @@ the capturing rate to add additional criteria for determining the set of
 DAR. The example code is provided below:
 
 ``` r
+
 cell_type_set <- unique(cell_types)
 capturing_rates <- r_by_ct_out$q_vec
 
